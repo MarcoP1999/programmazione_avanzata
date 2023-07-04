@@ -1,5 +1,5 @@
 #Progetto programmazione avanzata
-Si realizzi un sistema che consenta di gestire l’inferenza a partire da immagini o video forniti dall’utente su un modello pre-addestrato. Devono essere predisposte le seguenti rotte:
+#Si realizzi un sistema che consenta di gestire l’inferenza a partire da immagini o video forniti dall’utente su un modello pre-addestrato. Devono essere predisposte le seguenti rotte:
 •	[U] Creazione di un data-set (fornire metadati minimi come nome ed una serie di tag sotto forma di lista di parole); all’inizio il data-set risulta vuoto.
 •	[U] Cancellazione (logica) di un data-set
 •	[U] Ottenere la lista dei data-set

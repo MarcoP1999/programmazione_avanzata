@@ -1,6 +1,8 @@
-'use strict';
+import { SingletonDB } from "./model/Database";
+import * as express from 'express';
 
 const express = require('express');
+const sequelize = require('sequelize')
 const Pool = require('pg').Pool
 const pool = new Pool()
 const getUserById = (request, response) =>{
@@ -18,11 +20,12 @@ const HOST = '0.0.0.0';
 
 // App
 const app = express();
+
 app.get('/', (req, res) => {
   res.send('Hello World');
 });
 
-app.get('/users/:id', getUserById);
+
 
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);

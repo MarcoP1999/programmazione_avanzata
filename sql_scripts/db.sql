@@ -1,7 +1,7 @@
-CREATE DATABASE prav;
-\c prav
+CREATE DATABASE sam_storage;
+\c sam_storage
 CREATE TABLE users(
-  email varchar(50) NOT NULL,
+  email varchar(30) NOT NULL,
   budget REAL NOT NULL
 );
 

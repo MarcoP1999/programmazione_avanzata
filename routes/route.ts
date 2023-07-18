@@ -1,11 +1,9 @@
-import * as auth from "../middleware/authorizationM";
+import * as auth from "../middleware/authorization";
 
 const express = require("express");
 const router = express.Router();
 
-let cntrModel = new ModelController();
-let cntrReview = new ReviewController();
-let cntrSimulation = new SimulationController();
+//let cntrModel = new ModelController();
 router.use(express.json());
 
 
@@ -23,82 +21,17 @@ router.use((err, req, res, next) => {
 
 router.use([auth.checkHeader, auth.checkToken, auth.verifyAndAuthenticate]);
 
-router.post(
-	"/newModel",
-	auth.checkUser,
-	auth.checkCredito,
-	mNM.newModelValidation,
-	async (req, res) => {
-		cntrModel.insertNewModel(req, res);
-	}
+router.get("/user",
+	auth.checkUser
 );
 
-router.post(
-  "/solveModel",
-  auth.checkUser,
-  solve.checkSolve,
-  solve.checkCreditoSolve,
-  async (req, res) => {
-    cntrModel.solveModel(req, res);
-  }
-);
-
+/* 
 router.post(
   "/admin",
   admin.checkAdmin,
   admin.CheckReceiver,
   async (req, res) => {
     cntrModel.creditCharge(req, res);
-  }
-);
-
-router.post(
-  "/newReview",
-  auth.checkUser,
-  auth.checkCredito,
-  mNM.newModelValidation,
-  async (req, res) => {
-    cntrReview.newReview(req, res);
-  }
-);
-
-router.get(
-  "/filterReviews",
-  auth.checkUser,
-  review.middleFilterReview,
-  async (req, res) => {
-    cntrReview.filterReview(req, res);
-  }
-);
-
-router.get(
-  "/filterModels",
-  auth.checkUser,
-  mNM.newFilterValidation,
-  async (req, res) => {
-    cntrModel.filterPlus1(req, res);
-  }
-);
-
-router.post(
-  "/deleteReview",
-  auth.checkUser,
-  review.middleDeleteReview,
-  async (req, res) => {
-    cntrReview.deleteReview(req, res);
-  }
-);
-
-router.get("/getDeletedReview", auth.checkUser, async (req, res) => {
-  cntrReview.getDeletedReview(req, res);
-});
-
-router.post(
-  "/restoreReview",
-  auth.checkUser,
-  review.middleRestoreReview,
-  async (req, res) => {
-    cntrReview.restoreReview(req, res);
   }
 );
 
@@ -110,12 +43,12 @@ router.get(
   async (req, res) => {
     cntrSimulation.doSimulation(req, res);
   }
-);
+); 
+*/
 
 router.get("*", async (req, res) => {
   res.sendStatus(404);
 });
-
 router.post("*", async (req, res) => {
   res.sendStatus(404);
 });

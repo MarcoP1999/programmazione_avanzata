@@ -27,11 +27,12 @@ const User = sequelize.define(
  * @returns budget
  */
 export async function getBudget(email: string) {
-    const budget = await User.findOne({
-      attributes: ["budget"],
-      where: { email: `${email}` },
-    });
-    return budget;
+	const budget = await User.findOne({
+			attributes: ["budget"],
+			where: { email: `${email}` },
+	}
+	);
+	return budget;
   }
   
   /**

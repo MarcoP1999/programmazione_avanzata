@@ -11,8 +11,11 @@
   "dependencies": {
     "bullmq": "^4.3.0",
     "express": "^4.18.2",
+    "express-oauth2-jwt-bearer": "^1.5.0",
+    "jsonwebtoken": "^9.0.1",
     "pg": "^8.11.1",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.32.1"
+    "sequelize": "^6.32.1",
+    "sqlite3": "^5.1.6"
   }
 }

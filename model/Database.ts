@@ -17,8 +17,10 @@ export class SingletonDB { // connessione al db realizzata con classe Singleton
             port: port,
             dialect: 'postgres',
             dialectOptions: {
-
             },  
+            define: {
+                freezeTableName: true
+            },
             logging:false});
             
     }

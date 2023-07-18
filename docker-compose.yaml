@@ -6,27 +6,13 @@ services:
         image: postgres
         restart: always
         environment:
-          - POSTGRES_USER=${PGUSER}
-          - POSTGRES_PASSWORD=${PGPASSWORD}
+          - POSTGRES_USER = ${PGUSER}
+          - POSTGRES_PASSWORD = ${PGPASSWORD}
         ports:
           - 5432:5432
         volumes: 
           # copy the sql script to create tables
-          - ./sql_scripts/db.sql:/docker-entrypoint-initdb.d/db.sql  
-        networks:
-          - app-network 
-    pgadmin:
-        image: dpage/pgadmin4
-        depends_on:
-            - postgres
-        ports:
-            - "8080:80"
-        environment:
-              PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
-              PGADMIN_DEFAULT_PASSWORD: admin
-        networks:
-            - app-network
-            
+          - ./sql_scripts/SAM_storage.sql:/docker-entrypoint-initdb.d/SAM_storage.sql
     cache:
         image: redis:7-alpine
         restart: always
@@ -42,7 +28,3 @@ services:
         depends_on:
           - postgres_db
           - cache
-
-networks:
-  app-network:
-    driver: bridge

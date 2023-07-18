@@ -4,21 +4,21 @@ import { SingletonDB } from "../model/Database";
 const sequelize = SingletonDB.getInstance().getConnection();
 
 const User = sequelize.define(
-  "users",
+  "Users",
   {
     email: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(30),
       allowNull: false,
     },
     budget: {
       type: DataTypes.FLOAT,
       allowNull: false,
     }
-  },
-  {
+  }
+  /* {
     modelName: "users",
     timestamps: false,
-  }
+  } */
 );
 
 /**
@@ -53,7 +53,7 @@ export async function getBudget(email: string) {
    * @param email l'email dell'utente
    */
   export async function updateBudget(newBudget: Number, email: string) {
-    const user = await User.update(
+    await User.update(
       {
         budget: newBudget,
       },

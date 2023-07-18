@@ -7,5 +7,6 @@ RUN npm install sequelize
 RUN npm install -g typescript
 RUN npm install bull --save
 RUN npm install jsonwebtoken
+RUN npm install ts-node
 RUN tsc
-CMD ["node", "index.ts"]
+CMD ["ts-node", "index.ts"]

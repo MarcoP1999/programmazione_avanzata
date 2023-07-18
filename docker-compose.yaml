@@ -2,30 +2,30 @@ version: '3.7'
 services:
     postgres_db:
         env_file:
-         - .env
+            - .env
         image: postgres
         restart: always
         environment:
-          - POSTGRES_DB = ${PGDATABASE}
-          - POSTGRES_USER = ${PGUSER}
-          - POSTGRES_PASSWORD = ${PGPASSWORD}
+            POSTGRES_DB: ${PGDATABASE}
+            POSTGRES_USER: ${PGUSER}
+            POSTGRES_PASSWORD: ${PGPASSWORD}
         ports:
-          - 5432:5432
+            - 5432:5432
         volumes: 
-          # copy the sql script to create tables
-          - ./sql_scripts/SAM_storage.sql:/docker-entrypoint-initdb.d/SAM_storage.sql
+            # copy the sql script to create tables
+            - ./sql_scripts/SAM_storage.sql:/docker-entrypoint-initdb.d/SAM_storage.sql
     cache:
-        image: redis:7-alpine
-        restart: always
-        ports:
-          - 6379:6379       
+            image: redis:7-alpine
+            restart: always
+            ports:
+                - 6379:6379       
     nodeapp:
-        build: . 
-        restart: always
-        ports:
-          - 8080:8080
-        env_file:
-         - .env
-        depends_on:
-          - postgres_db
-          - cache
+                build: . 
+                restart: always
+                ports:
+                    - 8080:8080
+                env_file:
+                 - .env
+                depends_on:
+                    - postgres_db
+                    - cache

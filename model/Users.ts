@@ -1,23 +1,23 @@
 import { DataTypes, Model, Sequelize } from "sequelize";
-import { SingletonDB } from "../model/Database";
+import { SingletonDB } from "../model/Database.js";
 
 const sequelize = SingletonDB.getInstance().getConnection();
 
 const User = sequelize.define(
   "Users",
   {
-    email: {
-      type: DataTypes.STRING(30),
-      allowNull: false,
-    },
-    budget: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-    }
+	email: {
+	  type: DataTypes.STRING(30),
+	  allowNull: false,
+	},
+	budget: {
+	  type: DataTypes.FLOAT,
+	  allowNull: false,
+	}
   }
   /* {
-    modelName: "users",
-    timestamps: false,
+	modelName: "users",
+	timestamps: false,
   } */
 );
 
@@ -41,11 +41,11 @@ export async function getBudget(email: string) {
    * @returns oggetto user trovato.
    */
   export async function checkUser(email: string) {
-    const user = await User.findOne({
-      attributes: ['email'],
-      where: { email: email },
-    });
-    return user;
+	const user = await User.findOne({
+	  attributes: ['email'],
+	  where: { email: email },
+	});
+	return user;
   }
   
   /**
@@ -54,12 +54,12 @@ export async function getBudget(email: string) {
    * @param email l'email dell'utente
    */
   export async function updateBudget(newBudget: Number, email: string) {
-    await User.update(
-      {
-        budget: newBudget,
-      },
-      {
-        where: { email: `${email}` },
-      }
-    );
+	await User.update(
+	  {
+		budget: newBudget,
+	  },
+	  {
+		where: { email: `${email}` },
+	  }
+	);
   }

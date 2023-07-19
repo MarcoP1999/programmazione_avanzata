@@ -5,10 +5,6 @@ CREATE DATABASE SAM_storage;
 --
 -- --------------------------------------------------------
 --
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-
--- --------------------------------------------------------
---
 -- Struttura della tabella `Users`
 --
 CREATE TABLE `Users` (

@@ -1,6 +1,4 @@
-require('dotenv').config();
-import { Sequelize} from "sequelize";
-require('dotenv').config({ path: __dirname+'../.env' });
+import {Sequelize} from "sequelize";
 
 export class SingletonDB { // connessione al db realizzata con classe Singleton
     private static instance: SingletonDB;

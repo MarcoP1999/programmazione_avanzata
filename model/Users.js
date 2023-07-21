@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,30 +35,27 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import { DataTypes } from "sequelize";
-import { SingletonDB } from "../model/Database.js";
-var sequelize = SingletonDB.getInstance().getConnection();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.updateBudget = exports.checkUser = exports.getBudget = void 0;
+var sequelize_1 = require("sequelize");
+var Database_js_1 = require("../model/Database.js");
+var sequelize = Database_js_1.SingletonDB.getInstance().getConnection();
 var User = sequelize.define("Users", {
     email: {
-        type: DataTypes.STRING(30),
+        type: sequelize_1.DataTypes.STRING(30),
         allowNull: false,
     },
     budget: {
-        type: DataTypes.FLOAT,
+        type: sequelize_1.DataTypes.FLOAT,
         allowNull: false,
     }
-}
-/* {
-  modelName: "users",
-  timestamps: false,
-} */
-);
+});
 /**
  * restituisce il budget dell'utente, selezionandolo via email
  * @param email email dell'utente
  * @returns budget
  */
-export function getBudget(email) {
+function getBudget(email) {
     return __awaiter(this, void 0, void 0, function () {
         var budget;
         return __generator(this, function (_a) {
@@ -73,12 +71,13 @@ export function getBudget(email) {
         });
     });
 }
+exports.getBudget = getBudget;
 /**
  * controlla esistenza di un utente tramite la email.
  * @param email
  * @returns oggetto user trovato.
  */
-export function checkUser(email) {
+function checkUser(email) {
     return __awaiter(this, void 0, void 0, function () {
         var user;
         return __generator(this, function (_a) {
@@ -94,12 +93,13 @@ export function checkUser(email) {
         });
     });
 }
+exports.checkUser = checkUser;
 /**
  * ricarica il budget dell'utente, cercando per email.
  * @param newBudget nuovo budget
  * @param email l'email dell'utente
  */
-export function updateBudget(newBudget, email) {
+function updateBudget(newBudget, email) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -115,3 +115,4 @@ export function updateBudget(newBudget, email) {
         });
     });
 }
+exports.updateBudget = updateBudget;

@@ -15,10 +15,6 @@ const User = sequelize.define(
 	  allowNull: false,
 	}
   }
-  /* {
-	modelName: "users",
-	timestamps: false,
-  } */
 );
 
 /**

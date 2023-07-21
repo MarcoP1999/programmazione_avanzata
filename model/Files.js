@@ -1,17 +1,19 @@
-import { DataTypes } from "sequelize";
-import { SingletonDB } from "../model/Database";
-var sequelize = SingletonDB.getInstance().getConnection();
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var sequelize_1 = require("sequelize");
+var Database_1 = require("../model/Database");
+var sequelize = Database_1.SingletonDB.getInstance().getConnection();
 var Dataset = sequelize.define("Files", {
     file_id: {
-        type: DataTypes.INTEGER,
+        type: sequelize_1.DataTypes.INTEGER,
         allowNull: false,
     },
     fk_dataset: {
-        type: DataTypes.INTEGER,
+        type: sequelize_1.DataTypes.INTEGER,
         allowNull: false,
     },
     file: {
-        type: DataTypes.BLOB,
+        type: sequelize_1.DataTypes.BLOB,
         allowNull: false,
     }
 });

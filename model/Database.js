@@ -1,4 +1,7 @@
-import { Sequelize } from "sequelize";
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SingletonDB = void 0;
+var sequelize_1 = require("sequelize");
 var SingletonDB = /** @class */ (function () {
     function SingletonDB() {
         var db = process.env.PGDATABASE;
@@ -6,7 +9,7 @@ var SingletonDB = /** @class */ (function () {
         var password = process.env.PGPASSWORD;
         var host = process.env.PGHOST;
         var port = Number(process.env.PGPORT);
-        this.singleConnection = new Sequelize(db, username, password, {
+        this.singleConnection = new sequelize_1.Sequelize(db, username, password, {
             host: host,
             port: port,
             dialect: 'postgres',
@@ -28,4 +31,4 @@ var SingletonDB = /** @class */ (function () {
     };
     return SingletonDB;
 }());
-export { SingletonDB };
+exports.SingletonDB = SingletonDB;

@@ -1,3 +1,27 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,8 +58,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import * as jwt from "jsonwebtoken";
-import * as userModel from "../model/Users.js";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.checkUser = exports.verifyAndAuthenticate = exports.checkToken = exports.checkHeader = void 0;
+var jwt = __importStar(require("jsonwebtoken"));
+var userModel = __importStar(require("../model/Users.js"));
 /**
  * jwt per lo user
  * {
@@ -43,7 +69,49 @@ import * as userModel from "../model/Users.js";
     *  "role":"1"
  * }
  */
-export function checkUser(req, res, next) {
+var checkHeader = function (req, res, next) {
+    var authHeader = req.headers.authorization;
+    if (authHeader) {
+        console.log("OK checkHeader");
+        next();
+    }
+    else {
+        res.sendStatus(401);
+    }
+};
+exports.checkHeader = checkHeader;
+function checkToken(req, res, next) {
+    var bearerHeader = req.headers.authorization;
+    if (typeof bearerHeader !== "undefined") {
+        var bearerToken = bearerHeader.split(" ")[1];
+        req.token = bearerToken;
+        console.log("OK checkToken");
+        next();
+    }
+    else {
+        res.sendStatus(401);
+    }
+}
+exports.checkToken = checkToken;
+function verifyAndAuthenticate(req, res, next) {
+    try {
+        var decoded = jwt.verify(req.token, process.env.SECRET_KEY);
+        if (decoded !== null) {
+            req.user = decoded;
+            console.log(String(req.user));
+            console.log("OK verify");
+            next();
+        }
+        else {
+            res.sendStatus(401);
+        }
+    }
+    catch (e) {
+        res.sendStatus(401);
+    }
+}
+exports.verifyAndAuthenticate = verifyAndAuthenticate;
+function checkUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             if (userModel.checkUser(req.user.email) && req.user.role === "1") {
@@ -56,41 +124,7 @@ export function checkUser(req, res, next) {
         });
     });
 }
-export var checkHeader = function (req, res, next) {
-    var authHeader = req.headers.authorization;
-    if (authHeader) {
-        next();
-    }
-    else {
-        res.sendStatus(401);
-    }
-};
-export function checkToken(req, res, next) {
-    var bearerHeader = req.headers.authorization;
-    if (typeof bearerHeader !== "undefined") {
-        var bearerToken = bearerHeader.split(" ")[1];
-        req.token = bearerToken;
-        next();
-    }
-    else {
-        res.sendStatus(401);
-    }
-}
-export function verifyAndAuthenticate(req, res, next) {
-    try {
-        var decoded = jwt.verify(req.token, process.env.SECRET_KEY);
-        if (decoded !== null) {
-            req.user = decoded;
-            next();
-        }
-        else {
-            res.sendStatus(401);
-        }
-    }
-    catch (e) {
-        res.sendStatus(401);
-    }
-}
+exports.checkUser = checkUser;
 /* export const valore = (variabile, object) => {
   // se la variabile corrente è dentro binaries o generals costerà 0.1, altrimenti 0.05
   if (object.binaries && object.binaries.includes(variabile)) {

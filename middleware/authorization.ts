@@ -8,17 +8,10 @@ import * as userModel from "../model/Users.js";
  * }
  */
 
-export async function checkUser(req, res, next) {
-	if ( userModel.checkUser(req.user.email) && req.user.role === "1" ) {
-		next();
-	} else {
-		res.sendStatus(401).json({message: "User not found", status: 401})
-	}
-}
-
 export var checkHeader = function (req, res, next) {
 	const authHeader = req.headers.authorization;
 	if (authHeader) {
+		console.log("OK checkHeader");
 		next();
 	} else {
 		res.sendStatus(401);
@@ -30,6 +23,7 @@ export function checkToken(req, res, next) {
 	if (typeof bearerHeader !== "undefined") {
 		const bearerToken = bearerHeader.split(" ")[1];
 		req.token = bearerToken;
+		console.log("OK checkToken");
 		next();
 	} else {
 		res.sendStatus(401);
@@ -41,15 +35,24 @@ export function verifyAndAuthenticate(req, res, next) {
 		let decoded = jwt.verify(req.token, process.env.SECRET_KEY);
 		if (decoded !== null) {
 			req.user = decoded;
+			console.log(String(req.user));
+			console.log("OK verify");
 			next();
 		} else {
 			res.sendStatus(401);
 		}
-		} catch (e) {
-			res.sendStatus(401);
-		}
+	} catch (e) {
+		res.sendStatus(401);
 	}
+}
 
+export async function checkUser(req, res, next) {
+	if ( userModel.checkUser(req.user.email) && req.user.role === "1" ) {
+		next();
+	} else {
+		res.sendStatus(401).json({message: "User not found", status: 401});
+	}
+}
 /* export const valore = (variabile, object) => {
   // se la variabile corrente è dentro binaries o generals costerà 0.1, altrimenti 0.05
   if (object.binaries && object.binaries.includes(variabile)) {

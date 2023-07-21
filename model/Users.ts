@@ -3,7 +3,7 @@ import { SingletonDB } from "../model/Database.js";
 
 const sequelize = SingletonDB.getInstance().getConnection();
 
-const User = sequelize.define(
+const Users = sequelize.define(
   "Users",
   {
 	email: {
@@ -23,11 +23,10 @@ const User = sequelize.define(
  * @returns budget
  */
 export async function getBudget(email: string) {
-	const budget = await User.findOne({
-			attributes: ["budget"],
-			where: { email: `${email}` },
-	}
-	);
+	const budget = await Users.findOne({
+			attributes: ['budget'],
+			where: { email: email },
+	});
 	return budget;
   }
   
@@ -36,13 +35,13 @@ export async function getBudget(email: string) {
    * @param email 
    * @returns oggetto user trovato.
    */
-  export async function checkUser(email: string) {
-	const user = await User.findOne({
-	  attributes: ['email'],
-	  where: { email: email },
+export async function checkUser(email: string) {
+	const user = await Users.findOne({
+		attributes: ['email'],
+		where: { email: email },
 	});
 	return user;
-  }
+}
   
   /**
    * ricarica il budget dell'utente, cercando per email.
@@ -50,7 +49,7 @@ export async function getBudget(email: string) {
    * @param email l'email dell'utente
    */
   export async function updateBudget(newBudget: Number, email: string) {
-	await User.update(
+	await Users.update(
 	  {
 		budget: newBudget,
 	  },

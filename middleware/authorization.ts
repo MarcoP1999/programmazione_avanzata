@@ -11,7 +11,6 @@ import * as userModel from "../model/Users.js";
 export var checkHeader = function (req, res, next) {
 	const authHeader = req.headers.authorization;
 	if (authHeader) {
-		console.log("OK checkHeader");
 		next();
 	} else {
 		res.sendStatus(401);
@@ -23,7 +22,6 @@ export function checkToken(req, res, next) {
 	if (typeof bearerHeader !== "undefined") {
 		const bearerToken = bearerHeader.split(" ")[1];
 		req.token = bearerToken;
-		console.log("OK checkToken");
 		next();
 	} else {
 		res.sendStatus(401);
@@ -36,7 +34,7 @@ export function verifyAndAuthenticate(req, res, next) {
 		if (decoded !== null) {
 			req.user = decoded;
 			console.log(String(req.user));
-			console.log("OK verify");
+			console.log("Auth is OK");
 			next();
 		} else {
 			res.sendStatus(401);

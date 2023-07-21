@@ -34,6 +34,13 @@ router.get("/user",
 	}
 );
 
+router.get("/budget",
+	auth.checkUser,
+	async (req, res) => {
+  		userCnt.getBudget(req,res);
+	}
+);
+
 
 //-------------------- Error Fallback --------------------------------------
 router.get("*", async (req, res) => {

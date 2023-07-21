@@ -1,66 +1,43 @@
-CREATE DATABASE SAM_storage;
+-- Database: SAM_storage
+
+-- DROP DATABASE "SAM_storage" WITH (FORCE);
+
+SELECT 'CREATE DATABASE SAM_storage' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'SAM_storage')
+\gexec
 \c SAM_storage
---
--- Database: "SAM_storage"
---
--- --------------------------------------------------------
---
--- Struttura della tabella "Users"
---
-CREATE TABLE "Users" (
-  "email" varchar(30) NOT NULL,
-  "budget" float NOT NULL,
-  PRIMARY KEY ("email")
-);
--- --------------------------------------------------------
---
--- Struttura della tabella "Datasets"
---
-CREATE TABLE "Datasets" (
-  "dataset_id" int NOT NULL,
-  "fk_user" varchar(30) NOT NULL,
-  "name" varchar(30) NOT NULL,
-  PRIMARY KEY ("dataset_id")
+
+
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS public."Datasets"
+(
+    dataset_id integer NOT NULL,
+    fk_user character varying(30) COLLATE pg_catalog."default",
+    name character varying(30) COLLATE pg_catalog."default",
+    CONSTRAINT "Datasets_pkey" PRIMARY KEY (dataset_id)
 );
 
--- --------------------------------------------------------
---
--- Struttura della tabella "Files"
---
-CREATE TABLE "Files" (
-  "file_id" int NOT NULL,
-  "fk_dataset" int NOT NULL,
-  "file" bytea NOT NULL,
-  PRIMARY KEY ("file_id")
+
+CREATE TABLE IF NOT EXISTS public."Files"
+(
+    file_id integer NOT NULL,
+    fk_dataaset integer NOT NULL,
+    file bytea,
+    CONSTRAINT "Files_pkey" PRIMARY KEY (file_id)
 );
 
--- --------------------------------------------------------
---
--- AUTO_INCREMENT per la tabella "Datasets"
---
-ALTER TABLE "Datasets"
-  MODIFY "dataset_id" int NOT NULL AUTO_INCREMENT;
---
--- AUTO_INCREMENT per la tabella "Files"
---
-ALTER TABLE "Files"
-  MODIFY "file_id" int NOT NULL AUTO_INCREMENT;
 
--- --------------------------------------------------------
---
--- Limiti per la tabella "Datasets"
---
-ALTER TABLE "Datasets"
-  ADD CONSTRAINT "fk_user" FOREIGN KEY ("fk_user") REFERENCES "Users" ("email");
---
--- Limiti per la tabella "Files"
---
-ALTER TABLE "Files"
-  ADD CONSTRAINT "fk_dataset" FOREIGN KEY ("fk_dataset") REFERENCES "Datasets" ("dataset_id");
-COMMIT;
+CREATE TABLE IF NOT EXISTS public."Users"
+(
+    email character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    budget real DEFAULT 20,
+    role boolean DEFAULT true,
+    CONSTRAINT "Users_pkey" PRIMARY KEY (email)
+);
 
--- --------------------------------------------------------
---
-INSERT INTO users(email, budget) VALUES
-('user@user.com', 15),
-('marco@proietti.com', 100);
+INSERT INTO public."Users" (email, budget, role)
+    VALUES
+    ('user@user.com', 20, true),
+    ('admin@admin.com', 200, false);
+
+END;

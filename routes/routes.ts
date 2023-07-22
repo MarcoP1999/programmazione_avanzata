@@ -20,7 +20,9 @@ router.use((err, req, res, next) => {
 
 //-------------------- USER ------------------------------------------
 import { UserController } from "../controller/UserController.js"
+import { AdminController } from "../controller/AdminController.js";
 let userCnt = new UserController();
+let adminCnt = new AdminController();
 
 
 router.get('/test', async (req, res) => {
@@ -30,7 +32,7 @@ router.get('/test', async (req, res) => {
 router.get("/user",
 	auth.checkUser,
 	async (req, res) => {
-  		userCnt.retrieveUser(req,res);
+		res.status(200).send("Hello "+req.user.email);
 	}
 );
 
@@ -38,6 +40,13 @@ router.get("/budget",
 	auth.checkUser,
 	async (req, res) => {
   		userCnt.getBudget(req,res);
+	}
+);
+
+router.get("/setBudget",
+	auth.checkUser,
+	async (req, res) => {
+		adminCnt.setBudget(req,res);
 	}
 );
 

@@ -18,5 +18,10 @@ const Dataset = sequelize.define(
 		type: DataTypes.STRING(30),
 		allowNull: false,
 	  }
+  },
+	{
+		timestamps: false,
+		createdAt: false,
+		updatedAt: false
   }
 );

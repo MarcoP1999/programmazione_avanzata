@@ -27,7 +27,6 @@ export class SingletonDB { // connessione al db realizzata con classe Singleton
         if (!SingletonDB.instance) {
             SingletonDB.instance = new SingletonDB();
         }
-
         return SingletonDB.instance;
     }
 

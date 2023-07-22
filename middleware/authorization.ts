@@ -33,8 +33,7 @@ export function verifyAndAuthenticate(req, res, next) {
 		let decoded = jwt.verify(req.token, process.env.SECRET_KEY);
 		if (decoded !== null) {
 			req.user = decoded;
-			console.log(String(req.user));
-			console.log("Auth is OK");
+			console.log("Answered to Authenticated Client");
 			next();
 		} else {
 			res.sendStatus(401);
@@ -45,12 +44,12 @@ export function verifyAndAuthenticate(req, res, next) {
 }
 
 export async function checkUser(req, res, next) {
-	if ( userModel.checkUser(req.user.email) && req.user.role === "1" ) {
+	if ( await (userModel.checkUser(req.user.email)) != null)
 		next();
-	} else {
-		res.sendStatus(401).json({message: "User not found", status: 401});
-	}
+	else 
+		res.status(400).send("User "+req.user.email+" not found!");
 }
+
 /* export const valore = (variabile, object) => {
   // se la variabile corrente è dentro binaries o generals costerà 0.1, altrimenti 0.05
   if (object.binaries && object.binaries.includes(variabile)) {

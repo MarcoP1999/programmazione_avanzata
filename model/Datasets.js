@@ -16,4 +16,8 @@ var Dataset = sequelize.define("Datasets", {
         type: sequelize_1.DataTypes.STRING(30),
         allowNull: false,
     }
+}, {
+    timestamps: false,
+    createdAt: false,
+    updatedAt: false
 });

@@ -4,17 +4,22 @@ import { SingletonDB } from "../model/Database.js";
 const sequelize = SingletonDB.getInstance().getConnection();
 
 const Users = sequelize.define(
-  "Users",
-  {
-	email: {
-	  type: DataTypes.STRING(30),
-	  allowNull: false,
+	"Users",
+	{
+		email: {
+		type: DataTypes.STRING(30),
+		allowNull: false,
+		},
+		budget: {
+		type: DataTypes.REAL,
+		allowNull: false,
+		}
 	},
-	budget: {
-	  type: DataTypes.FLOAT,
-	  allowNull: false,
-	}
-  }
+	{
+		timestamps: false,
+		createdAt: false,
+		updatedAt: false
+  	}
 );
 
 /**
@@ -48,13 +53,15 @@ export async function checkUser(email: string) {
    * @param newBudget nuovo budget
    * @param email l'email dell'utente
    */
-  export async function updateBudget(newBudget: Number, email: string) {
-	await Users.update(
-	  {
-		budget: newBudget,
-	  },
-	  {
-		where: { email: `${email}` },
+export async function updateBudget(newBudget: Number, usermail: string) {
+	try {
+		await Users.update(
+			{	budget: newBudget	},
+			{	where: { email: usermail}	}
+		);
+	  } 
+	  catch (err) {
+			console.log(err);
 	  }
-	);
-  }
+	
+}

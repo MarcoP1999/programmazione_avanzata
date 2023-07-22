@@ -59,93 +59,29 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkUser = exports.verifyAndAuthenticate = exports.checkToken = exports.checkHeader = void 0;
-var jwt = __importStar(require("jsonwebtoken"));
+exports.AdminController = void 0;
 var userModel = __importStar(require("../model/Users.js"));
-/**
- * jwt per lo user
- * {
-    *  "email":"user@user.com",
-    *  "role":"1"
- * }
- */
-var checkHeader = function (req, res, next) {
-    var authHeader = req.headers.authorization;
-    if (authHeader) {
-        next();
+var AdminController = /** @class */ (function () {
+    function AdminController() {
+        var _this = this;
+        this.setBudget = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(req.user.role == "0")) return [3 /*break*/, 2];
+                        return [4 /*yield*/, userModel.updateBudget(req.user.budget, req.user.receiver)];
+                    case 1:
+                        _a.sent();
+                        res.status(200).send("New budget for user " + req.user.receiver + " is " + req.user.budget);
+                        return [3 /*break*/, 3];
+                    case 2:
+                        res.status(401).send("User " + req.user.email + " not (admin) authorized!");
+                        _a.label = 3;
+                    case 3: return [2 /*return*/];
+                }
+            });
+        }); };
     }
-    else {
-        res.sendStatus(401);
-    }
-};
-exports.checkHeader = checkHeader;
-function checkToken(req, res, next) {
-    var bearerHeader = req.headers.authorization;
-    if (typeof bearerHeader !== "undefined") {
-        var bearerToken = bearerHeader.split(" ")[1];
-        req.token = bearerToken;
-        next();
-    }
-    else {
-        res.sendStatus(401);
-    }
-}
-exports.checkToken = checkToken;
-function verifyAndAuthenticate(req, res, next) {
-    try {
-        var decoded = jwt.verify(req.token, process.env.SECRET_KEY);
-        if (decoded !== null) {
-            req.user = decoded;
-            console.log("Answered to Authenticated Client");
-            next();
-        }
-        else {
-            res.sendStatus(401);
-        }
-    }
-    catch (e) {
-        res.sendStatus(401);
-    }
-}
-exports.verifyAndAuthenticate = verifyAndAuthenticate;
-function checkUser(req, res, next) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, (userModel.checkUser(req.user.email))];
-                case 1:
-                    if ((_a.sent()) != null)
-                        next();
-                    else
-                        res.status(400).send("User " + req.user.email + " not found!");
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-exports.checkUser = checkUser;
-/* export const valore = (variabile, object) => {
-  // se la variabile corrente è dentro binaries o generals costerà 0.1, altrimenti 0.05
-  if (object.binaries && object.binaries.includes(variabile)) {
-    return 0.1;
-  } else if (object.generals && object.generals.includes(variabile)) {
-    return 0.1;
-  } else {
-    return 0.05;
-  }
-};
-
-export async function checkCredito(req, res, next) {
-    try {
-    let object = req.body;
-    let totalCost: number = costContraint(object) + checkBinOrInt(object);
-    const budget: any = await User.getBudget(req.user.email);
-    if (budget.budget > totalCost) { // vediamo se c'è credito a sufficienza
-        next();
-    } else {
-        res.sendStatus(401);
-    }
-    } catch (e) {
-        res.sendStatus(401);
-    }
-}*/ 
+    return AdminController;
+}());
+exports.AdminController = AdminController;

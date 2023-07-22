@@ -64,13 +64,13 @@ var userModel = __importStar(require("../model/Users.js"));
 var UserController = /** @class */ (function () {
     function UserController() {
         var _this = this;
-        this.retrieveUser = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+        this.getBudget = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
             var retrieved, _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         _b.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, userModel.checkUser(req.email)];
+                        return [4 /*yield*/, userModel.getBudget(req.user.email)];
                     case 1:
                         retrieved = _b.sent();
                         res.send(retrieved);
@@ -87,4 +87,3 @@ var UserController = /** @class */ (function () {
     return UserController;
 }());
 exports.UserController = UserController;
-exports.default = UserController;

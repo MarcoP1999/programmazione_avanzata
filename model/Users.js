@@ -40,15 +40,19 @@ exports.updateBudget = exports.checkUser = exports.getBudget = void 0;
 var sequelize_1 = require("sequelize");
 var Database_js_1 = require("../model/Database.js");
 var sequelize = Database_js_1.SingletonDB.getInstance().getConnection();
-var User = sequelize.define("Users", {
+var Users = sequelize.define("Users", {
     email: {
         type: sequelize_1.DataTypes.STRING(30),
         allowNull: false,
     },
     budget: {
-        type: sequelize_1.DataTypes.FLOAT,
+        type: sequelize_1.DataTypes.REAL,
         allowNull: false,
     }
+}, {
+    timestamps: false,
+    createdAt: false,
+    updatedAt: false
 });
 /**
  * restituisce il budget dell'utente, selezionandolo via email
@@ -60,9 +64,9 @@ function getBudget(email) {
         var budget;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, User.findOne({
-                        attributes: ["budget"],
-                        where: { email: "".concat(email) },
+                case 0: return [4 /*yield*/, Users.findOne({
+                        attributes: ['budget'],
+                        where: { email: email },
                     })];
                 case 1:
                     budget = _a.sent();
@@ -82,7 +86,7 @@ function checkUser(email) {
         var user;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, User.findOne({
+                case 0: return [4 /*yield*/, Users.findOne({
                         attributes: ['email'],
                         where: { email: email },
                     })];
@@ -99,18 +103,22 @@ exports.checkUser = checkUser;
  * @param newBudget nuovo budget
  * @param email l'email dell'utente
  */
-function updateBudget(newBudget, email) {
+function updateBudget(newBudget, usermail) {
     return __awaiter(this, void 0, void 0, function () {
+        var err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, User.update({
-                        budget: newBudget,
-                    }, {
-                        where: { email: "".concat(email) },
-                    })];
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, Users.update({ budget: newBudget }, { where: { email: usermail } })];
                 case 1:
                     _a.sent();
-                    return [2 /*return*/];
+                    return [3 /*break*/, 3];
+                case 2:
+                    err_1 = _a.sent();
+                    console.log(err_1);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
             }
         });
     });

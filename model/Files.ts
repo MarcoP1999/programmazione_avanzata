@@ -18,5 +18,10 @@ const Dataset = sequelize.define(
 		type: DataTypes.BLOB,
 		allowNull: false,
 	  }
-  }
+  },
+	{
+		timestamps: false,
+		createdAt: false,
+		updatedAt: false
+  	}
 );

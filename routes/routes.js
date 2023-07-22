@@ -58,94 +58,67 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkUser = exports.verifyAndAuthenticate = exports.checkToken = exports.checkHeader = void 0;
-var jwt = __importStar(require("jsonwebtoken"));
-var userModel = __importStar(require("../model/Users.js"));
-/**
- * jwt per lo user
- * {
-    *  "email":"user@user.com",
-    *  "role":"1"
- * }
- */
-var checkHeader = function (req, res, next) {
-    var authHeader = req.headers.authorization;
-    if (authHeader) {
-        next();
-    }
-    else {
-        res.sendStatus(401);
-    }
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-exports.checkHeader = checkHeader;
-function checkToken(req, res, next) {
-    var bearerHeader = req.headers.authorization;
-    if (typeof bearerHeader !== "undefined") {
-        var bearerToken = bearerHeader.split(" ")[1];
-        req.token = bearerToken;
-        next();
-    }
-    else {
-        res.sendStatus(401);
-    }
-}
-exports.checkToken = checkToken;
-function verifyAndAuthenticate(req, res, next) {
+Object.defineProperty(exports, "__esModule", { value: true });
+var express_1 = __importDefault(require("express"));
+var router = express_1.default.Router();
+router.use(express_1.default.json());
+//----------------- AUTH ------------------------------------------
+var auth = __importStar(require("../middleware/authorization.js"));
+router.use([auth.checkHeader, auth.checkToken, auth.verifyAndAuthenticate]);
+router.use(function (err, req, res, next) {
     try {
-        var decoded = jwt.verify(req.token, process.env.SECRET_KEY);
-        if (decoded !== null) {
-            req.user = decoded;
-            console.log("Answered to Authenticated Client");
-            next();
+        if (err instanceof SyntaxError && "body" in err) {
+            throw "JSON not valid";
         }
-        else {
-            res.sendStatus(401);
-        }
+        next();
     }
     catch (e) {
-        res.sendStatus(401);
+        res.sendStatus(400);
     }
-}
-exports.verifyAndAuthenticate = verifyAndAuthenticate;
-function checkUser(req, res, next) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, (userModel.checkUser(req.user.email))];
-                case 1:
-                    if ((_a.sent()) != null)
-                        next();
-                    else
-                        res.status(400).send("User " + req.user.email + " not found!");
-                    return [2 /*return*/];
-            }
-        });
+});
+//-------------------- USER ------------------------------------------
+var UserController_js_1 = require("../controller/UserController.js");
+var AdminController_js_1 = require("../controller/AdminController.js");
+var userCnt = new UserController_js_1.UserController();
+var adminCnt = new AdminController_js_1.AdminController();
+router.get('/test', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        res.send("test function");
+        return [2 /*return*/];
     });
-}
-exports.checkUser = checkUser;
-/* export const valore = (variabile, object) => {
-  // se la variabile corrente è dentro binaries o generals costerà 0.1, altrimenti 0.05
-  if (object.binaries && object.binaries.includes(variabile)) {
-    return 0.1;
-  } else if (object.generals && object.generals.includes(variabile)) {
-    return 0.1;
-  } else {
-    return 0.05;
-  }
-};
-
-export async function checkCredito(req, res, next) {
-    try {
-    let object = req.body;
-    let totalCost: number = costContraint(object) + checkBinOrInt(object);
-    const budget: any = await User.getBudget(req.user.email);
-    if (budget.budget > totalCost) { // vediamo se c'è credito a sufficienza
-        next();
-    } else {
-        res.sendStatus(401);
-    }
-    } catch (e) {
-        res.sendStatus(401);
-    }
-}*/ 
+}); });
+router.get("/user", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        res.status(200).send("Hello " + req.user.email);
+        return [2 /*return*/];
+    });
+}); });
+router.get("/budget", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        userCnt.getBudget(req, res);
+        return [2 /*return*/];
+    });
+}); });
+router.get("/setBudget", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        adminCnt.setBudget(req, res);
+        return [2 /*return*/];
+    });
+}); });
+//-------------------- Error Fallback --------------------------------------
+router.get("*", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        res.sendStatus(404);
+        return [2 /*return*/];
+    });
+}); });
+router.post("*", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        res.sendStatus(404);
+        return [2 /*return*/];
+    });
+}); });
+module.exports = router;

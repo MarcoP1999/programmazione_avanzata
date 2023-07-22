@@ -16,4 +16,8 @@ var Dataset = sequelize.define("Files", {
         type: sequelize_1.DataTypes.BLOB,
         allowNull: false,
     }
+}, {
+    timestamps: false,
+    createdAt: false,
+    updatedAt: false
 });

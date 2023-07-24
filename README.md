@@ -35,19 +35,18 @@ Con middleware viene inteso uno strato intermedio che si occupa di validare le r
 ## Metodo di utilizzo
 Per testare il progetto, è necessario seguire questi passaggi:
 
-    1.Scaricare il progetto copiando l'URL del repository Git o scaricando il file ZIP.
-    1.Importare il pacchetto di chiamate fornito nella cartella postman in Postman.
-    1.Compilare il file .env con i dati qui forniti:
-    1.Installare Docker dal sito ufficiale.
-    1.Avviare Docker e assicurarsi che i servizi necessari per il progetto siano in esecuzione.
-    1.Utilizzare Postman per inviare le chiamate al server e verificare le risposte.
+1. Scaricare il progetto copiando l'URL del repository Git o scaricando il file ZIP.
+2. Importare il pacchetto di chiamate fornito nella cartella postman in Postman.
+3. Compilare il file .env con i dati qui forniti:
+4. Installare Docker dal sito ufficiale.
+5. Avviare Docker e assicurarsi che i servizi necessari per il progetto siano in esecuzione.
+6. Utilizzare Postman per inviare le chiamate al server e verificare le risposte.
 Lanciare quindi i seguenti comandi nella giusta directory:
-'''
-docker compose build
-docker compose up
-'''
+
+'docker compose build'
+'docker compose up'
 ## Software utilizzati
 
 ## Autori
-*[Alesi Mattia](https://github.com/alesimattia)
-*[Proietti Marco](https://github.com/MarcoP1999)
+* [Alesi Mattia](https://github.com/alesimattia)
+* [Proietti Marco](https://github.com/MarcoP1999)

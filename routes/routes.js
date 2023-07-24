@@ -108,6 +108,18 @@ router.get("/setBudget", auth.checkUser, function (req, res) { return __awaiter(
         return [2 /*return*/];
     });
 }); });
+router.get("/newDataset", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        userCnt.createDataset(req, res);
+        return [2 /*return*/];
+    });
+}); });
+router.get("/myDatasets", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        adminCnt.showDatasets(req, res);
+        return [2 /*return*/];
+    });
+}); });
 //-------------------- Python ------------------------------------------
 var pythonAdapter_1 = require("../middleware/pythonAdapter");
 var adapter = new pythonAdapter_1.PythonAdapter();

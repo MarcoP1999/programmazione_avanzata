@@ -7,12 +7,13 @@ const Users = sequelize.define(
 	"Users",
 	{
 		email: {
-		type: DataTypes.STRING(30),
-		allowNull: false,
+			type: DataTypes.STRING(30),
+			allowNull: false,
+			primaryKey: true
 		},
 		budget: {
-		type: DataTypes.REAL,
-		allowNull: false,
+			type: DataTypes.REAL,
+			allowNull: false
 		}
 	},
 	{

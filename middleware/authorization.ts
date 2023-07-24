@@ -43,11 +43,20 @@ export function verifyAndAuthenticate(req, res, next) {
 	}
 }
 
+
 export async function checkUser(req, res, next) {
 	if ( await (userModel.checkUser(req.user.email)) != null)
 		next();
 	else 
 		res.status(400).send("User "+req.user.email+" not found!");
+}
+
+
+export async function checkOwner(req, res, next) {
+	if ( await true )
+		next();
+	else 
+		res.status(401).send("User "+req.user.email+" not authorized to access here!");
 }
 
 /* export const valore = (variabile, object) => {

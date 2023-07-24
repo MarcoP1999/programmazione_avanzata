@@ -44,10 +44,11 @@ var Users = sequelize.define("Users", {
     email: {
         type: sequelize_1.DataTypes.STRING(30),
         allowNull: false,
+        primaryKey: true
     },
     budget: {
         type: sequelize_1.DataTypes.REAL,
-        allowNull: false,
+        allowNull: false
     }
 }, {
     timestamps: false,

@@ -38,21 +38,20 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PythonAdapter = void 0;
 var spawn = require('child_process').spawn;
-var returns;
+var returns = [];
 var PythonAdapter = /** @class */ (function () {
     function PythonAdapter() {
         var _this = this;
         this.read = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
             var python;
             return __generator(this, function (_a) {
-                python = spawn('python3', ['./python/SAM_model.py', String(req.user.email)]);
+                python = spawn('python', ['./python/SAM_model.py', String(req.user.email)]);
                 python.stdout.on('data', function (data) {
                     // Do something with the data returned from python script
                     returns.push(data.toString().split("\n"));
                 });
                 python.on('close', function (code) {
                     console.log("Executed python script " + code);
-                    console.log(returns);
                     // send data to browser
                     res.status(200).send(returns);
                 });

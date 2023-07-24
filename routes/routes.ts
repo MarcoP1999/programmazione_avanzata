@@ -50,6 +50,20 @@ router.get("/setBudget",
 	}
 );
 
+router.get("/newDataset",
+	auth.checkUser,
+	async (req, res) => {
+		userCnt.createDataset(req,res);
+	}
+);
+
+router.get("/myDatasets",
+	auth.checkUser,
+	async (req, res) => {
+		adminCnt.showDatasets(req,res);
+	}
+);
+
 //-------------------- Python ------------------------------------------
 import { PythonAdapter } from "../middleware/pythonAdapter";
 let adapter = new PythonAdapter();

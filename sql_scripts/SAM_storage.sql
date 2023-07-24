@@ -11,28 +11,25 @@ BEGIN;
 
 CREATE TABLE IF NOT EXISTS public."Datasets"
 (
-    dataset_id integer NOT NULL,
+    dataset_id SERIAL PRIMARY KEY,
     fk_user character varying(30) COLLATE pg_catalog."default",
-    name character varying(30) COLLATE pg_catalog."default",
-    CONSTRAINT "Datasets_pkey" PRIMARY KEY (dataset_id)
+    name character varying(30) COLLATE pg_catalog."default"
 );
 
 
 CREATE TABLE IF NOT EXISTS public."Files"
 (
-    file_id integer NOT NULL,
+    file_id SERIAL PRIMARY KEY,
     fk_dataaset integer NOT NULL,
-    file bytea,
-    CONSTRAINT "Files_pkey" PRIMARY KEY (file_id)
+    file bytea
 );
 
 
 CREATE TABLE IF NOT EXISTS public."Users"
 (
-    email character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    email character varying(30) PRIMARY KEY COLLATE pg_catalog."default" NOT NULL,
     budget real DEFAULT 20,
-    role boolean DEFAULT true,
-    CONSTRAINT "Users_pkey" PRIMARY KEY (email)
+    role boolean DEFAULT true
 );
 
 INSERT INTO public."Users" (email, budget, role)

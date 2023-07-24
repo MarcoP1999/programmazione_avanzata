@@ -61,6 +61,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 var userModel = __importStar(require("../model/Users.js"));
+var datasetModel = __importStar(require("../model/Datasets.js"));
 var UserController = /** @class */ (function () {
     function UserController() {
         var _this = this;
@@ -81,6 +82,15 @@ var UserController = /** @class */ (function () {
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
                 }
+            });
+        }); };
+        this.createDataset = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (datasetModel.newDataset(req.user.email, req.user.datasetName))
+                    res.status(200).send("Dataset '" + req.user.datasetName + "' created");
+                else
+                    res.sendStatus(400);
+                return [2 /*return*/];
             });
         }); };
     }

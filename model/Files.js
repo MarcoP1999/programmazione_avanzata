@@ -7,14 +7,16 @@ var Dataset = sequelize.define("Files", {
     file_id: {
         type: sequelize_1.DataTypes.INTEGER,
         allowNull: false,
+        primaryKey: true,
+        autoIncrement: true,
     },
     fk_dataset: {
         type: sequelize_1.DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: false
     },
     file: {
         type: sequelize_1.DataTypes.BLOB,
-        allowNull: false,
+        allowNull: false
     }
 }, {
     timestamps: false,

@@ -59,7 +59,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkUser = exports.verifyAndAuthenticate = exports.checkToken = exports.checkHeader = void 0;
+exports.checkOwner = exports.checkUser = exports.verifyAndAuthenticate = exports.checkToken = exports.checkHeader = void 0;
 var jwt = __importStar(require("jsonwebtoken"));
 var userModel = __importStar(require("../model/Users.js"));
 /**
@@ -124,6 +124,22 @@ function checkUser(req, res, next) {
     });
 }
 exports.checkUser = checkUser;
+function checkOwner(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, true];
+                case 1:
+                    if (_a.sent())
+                        next();
+                    else
+                        res.status(401).send("User " + req.user.email + " not authorized to access here!");
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.checkOwner = checkOwner;
 /* export const valore = (variabile, object) => {
   // se la variabile corrente è dentro binaries o generals costerà 0.1, altrimenti 0.05
   if (object.binaries && object.binaries.includes(variabile)) {

@@ -61,6 +61,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminController = void 0;
 var userModel = __importStar(require("../model/Users.js"));
+var datasetModel = __importStar(require("../model/Datasets.js"));
 var AdminController = /** @class */ (function () {
     function AdminController() {
         var _this = this;
@@ -79,6 +80,20 @@ var AdminController = /** @class */ (function () {
                         _a.label = 3;
                     case 3: return [2 /*return*/];
                 }
+            });
+        }); };
+        this.showDatasets = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+            var data, data;
+            return __generator(this, function (_a) {
+                if (req.user.role == "0") {
+                    data = datasetModel.getDatasets(req.user.role, req.user.email);
+                    res.status(200).send("Available datasets are: " + data);
+                }
+                else {
+                    data = datasetModel.getDatasets(req.user.budget, req.user.receiver);
+                    res.status(200).send("Your (" + req.user.receiver + ") datasets are " + data);
+                }
+                return [2 /*return*/];
             });
         }); };
     }

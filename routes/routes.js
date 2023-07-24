@@ -108,6 +108,15 @@ router.get("/setBudget", auth.checkUser, function (req, res) { return __awaiter(
         return [2 /*return*/];
     });
 }); });
+//-------------------- Python ------------------------------------------
+var pythonAdapter_1 = require("../middleware/pythonAdapter");
+var adapter = new pythonAdapter_1.PythonAdapter();
+router.get("/py", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        adapter.read(req, res);
+        return [2 /*return*/];
+    });
+}); });
 //-------------------- Error Fallback --------------------------------------
 router.get("*", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {

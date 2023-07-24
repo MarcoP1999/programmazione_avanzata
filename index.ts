@@ -4,6 +4,7 @@ dotenv.config({ path: './.env' });
 import express from 'express'
 var app = express();
 
+
 app.use('/', require("./routes/routes"));
 
 app.listen(process.env.APPPORT, process.env.APPHOST);

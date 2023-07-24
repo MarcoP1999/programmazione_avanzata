@@ -50,6 +50,17 @@ router.get("/setBudget",
 	}
 );
 
+//-------------------- Python ------------------------------------------
+import { PythonAdapter } from "../middleware/pythonAdapter";
+let adapter = new PythonAdapter();
+
+ router.get("/py",
+	auth.checkUser,
+	async (req, res) => {
+		adapter.read(req,res);
+	}
+);
+
 
 //-------------------- Error Fallback --------------------------------------
 router.get("*", async (req, res) => {

@@ -5,7 +5,7 @@ export class PythonAdapter{
 	
 	public read = async (req, res) => {
 		// spawn new child process to call the python script
-		const python = spawn('python', ['./python/SAM_model.py', String(req.user.email) ] );
+		const python = spawn('python', ['./python/SAM_model.py', req.user.email ] );
 		
 		python.stdout.on('data', (data) => {
 			// Do something with the data returned from python script

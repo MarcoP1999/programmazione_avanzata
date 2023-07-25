@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDatasets = exports.newDataset = void 0;
+exports.updateDataset = exports.deleteDataset = exports.getDatasets = exports.newDataset = void 0;
 var sequelize_1 = require("sequelize");
 var Database_1 = require("../model/Database");
 var sequelize = Database_1.SingletonDB.getInstance().getConnection();
@@ -85,26 +85,81 @@ function newDataset(owner, name) {
 exports.newDataset = newDataset;
 function getDatasets(role, owner) {
     return __awaiter(this, void 0, void 0, function () {
-        var err_2;
+        var datasets, list, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    if (!(role == 0)) return [3 /*break*/, 2];
+                    list = [];
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 6, , 7]);
+                    if (!(role == 0)) return [3 /*break*/, 3];
                     return [4 /*yield*/, Dataset.findAll()];
-                case 1: return [2 /*return*/, _a.sent()];
-                case 2: return [4 /*yield*/, Dataset.findAll({
+                case 2:
+                    datasets = _a.sent();
+                    return [3 /*break*/, 5];
+                case 3: return [4 /*yield*/, Dataset.findAll({
                         where: { fk_user: owner }
                     })];
-                case 3: return [2 /*return*/, _a.sent()];
-                case 4: return [3 /*break*/, 6];
-                case 5:
+                case 4:
+                    datasets = _a.sent();
+                    _a.label = 5;
+                case 5: 
+                /* datasets.forEach((item) => {
+                    list.push(item.dataValues.name);
+                }); */
+                return [2 /*return*/, datasets];
+                case 6:
                     err_2 = _a.sent();
                     console.log(err_2);
-                    return [3 /*break*/, 6];
-                case 6: return [2 /*return*/];
+                    return [2 /*return*/, 0];
+                case 7: return [2 /*return*/];
             }
         });
     });
 }
 exports.getDatasets = getDatasets;
+function deleteDataset(which) {
+    return __awaiter(this, void 0, void 0, function () {
+        var err_3;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, Dataset.destroy({
+                            where: { name: which }
+                        })];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/, true];
+                case 2:
+                    err_3 = _a.sent();
+                    console.log(err_3);
+                    return [2 /*return*/, false];
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.deleteDataset = deleteDataset;
+function updateDataset(which, newName) {
+    return __awaiter(this, void 0, void 0, function () {
+        var err_4;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, Dataset.update({ name: newName }, {
+                            where: { name: which }
+                        })];
+                case 1: return [2 /*return*/, _a.sent()];
+                case 2:
+                    err_4 = _a.sent();
+                    console.log(err_4);
+                    return [2 /*return*/, false];
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.updateDataset = updateDataset;

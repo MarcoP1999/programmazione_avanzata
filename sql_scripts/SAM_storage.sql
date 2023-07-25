@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS public."Files"
 (
     file_id SERIAL PRIMARY KEY,
     fk_dataaset integer NOT NULL,
-    file bytea
+    "filename" character varying(30),
+    "file" bytea
 );
 
 
@@ -35,6 +36,7 @@ CREATE TABLE IF NOT EXISTS public."Users"
 INSERT INTO public."Users" (email, budget, role)
     VALUES
     ('user@user.com', 20, true),
+    ('user2@user.com', 30, true),
     ('admin@admin.com', 200, false);
 
 END;

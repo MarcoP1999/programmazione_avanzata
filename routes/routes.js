@@ -114,9 +114,27 @@ router.get("/newDataset", auth.checkUser, function (req, res) { return __awaiter
         return [2 /*return*/];
     });
 }); });
-router.get("/myDatasets", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+router.get("/myDataset", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         adminCnt.showDatasets(req, res);
+        return [2 /*return*/];
+    });
+}); });
+router.get("/deleteDataset", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        adminCnt.deleteDataset(req, res);
+        return [2 /*return*/];
+    });
+}); });
+router.get("/renameDataset", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        userCnt.renameDataset(req, res);
+        return [2 /*return*/];
+    });
+}); });
+router.get("/upload", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        userCnt.upload(req, res);
         return [2 /*return*/];
     });
 }); });

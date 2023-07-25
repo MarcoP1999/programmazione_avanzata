@@ -45,7 +45,7 @@ var PythonAdapter = /** @class */ (function () {
         this.read = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
             var python;
             return __generator(this, function (_a) {
-                python = spawn('python', ['./python/SAM_model.py', String(req.user.email)]);
+                python = spawn('python', ['./python/SAM_model.py', req.user.email]);
                 python.stdout.on('data', function (data) {
                     // Do something with the data returned from python script
                     returns.push(data.toString().split("\n"));

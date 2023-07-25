@@ -83,15 +83,38 @@ var AdminController = /** @class */ (function () {
             });
         }); };
         this.showDatasets = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-            var data, data;
+            var list, datasets;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        list = [];
+                        return [4 /*yield*/, datasetModel.getDatasets(req.user.role, req.user.email)];
+                    case 1:
+                        datasets = _a.sent();
+                        datasets.forEach(function (item) {
+                            list.push(item.dataValues.name);
+                        });
+                        res.status(200).send("Available datasets are: " + String(list));
+                        return [2 /*return*/];
+                }
+            });
+        }); };
+        /* La verifica dei permessi di accesso è realizzato nel controller
+        * evitando di appesantire le funzionalità del Model, che rimane generico */
+        this.deleteDataset = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+            var yourDatasets;
             return __generator(this, function (_a) {
                 if (req.user.role == "0") {
-                    data = datasetModel.getDatasets(req.user.role, req.user.email);
-                    res.status(200).send("Available datasets are: " + data);
+                    datasetModel.deleteDataset(req.user.dataset);
+                    res.status(200).send("Admin deleted '" + req.user.dataset + "' dataset");
                 }
                 else {
-                    data = datasetModel.getDatasets(req.user.budget, req.user.receiver);
-                    res.status(200).send("Your (" + req.user.receiver + ") datasets are " + data);
+                    yourDatasets = datasetModel.getDatasets(req.user.role, req.user.email);
+                    if (req.user.dataset in yourDatasets)
+                        if (datasetModel.deleteDataset(req.user.dataset))
+                            res.status(200).send("Your dataset '" + req.user.dataset + "' has been removed");
+                        else
+                            res.status(401).send("User '" + req.user.email + "' can't remove dataset' " + req.user.dataset);
                 }
                 return [2 /*return*/];
             });

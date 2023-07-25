@@ -12,14 +12,31 @@ export class AdminController{
 			res.status(401).send("User "+req.user.email+" not (admin) authorized!");
 	}
 
+
 	public showDatasets = async (req, res) => {
+		let list = [];
+		let datasets: any = await datasetModel.getDatasets(req.user.role, req.user.email);
+		datasets.forEach((item) => {
+			list.push(item.dataValues.name);
+		});
+		res.status(200).send("Available datasets are: "+ String(list) );
+	}
+
+
+	/* La verifica dei permessi di accesso è realizzato nel controller
+	* evitando di appesantire le funzionalità del Model, che rimane generico */
+	public deleteDataset = async (req, res) => {
 		if(req.user.role == "0"){
-			let data: any = datasetModel.getDatasets(req.user.role, req.user.email);
-			res.status(200).send("Available datasets are: "+ data);
+			datasetModel.deleteDataset(req.user.dataset);
+			res.status(200).send("Admin deleted '"+ req.user.dataset+ "' dataset");
 		}
 		else{
-			let data: any = datasetModel.getDatasets(req.user.budget, req.user.receiver);
-			res.status(200).send("Your ("+ req.user.receiver+ ") datasets are "+ data);
+			let yourDatasets: any = datasetModel.getDatasets(req.user.role, req.user.email)
+			if(req.user.dataset in yourDatasets)
+				if( datasetModel.deleteDataset(req.user.dataset) )
+					res.status(200).send("Your dataset '"+ req.user.dataset+ "' has been removed");
+				else 
+					res.status(401).send("User '"+ req.user.email+ "' can't remove dataset' "+req.user.dataset);
 		}
 	}
 }

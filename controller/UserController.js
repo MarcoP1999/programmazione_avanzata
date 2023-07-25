@@ -62,35 +62,89 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 var userModel = __importStar(require("../model/Users.js"));
 var datasetModel = __importStar(require("../model/Datasets.js"));
+var fileModel = __importStar(require("../model/Files.js"));
 var UserController = /** @class */ (function () {
     function UserController() {
         var _this = this;
         this.getBudget = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-            var retrieved, _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var retrieved;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
-                        _b.trys.push([0, 2, , 3]);
+                        retrieved = null;
                         return [4 /*yield*/, userModel.getBudget(req.user.email)];
                     case 1:
-                        retrieved = _b.sent();
-                        res.send(retrieved);
-                        return [3 /*break*/, 3];
-                    case 2:
-                        _a = _b.sent();
-                        res.sendStatus(400);
-                        return [3 /*break*/, 3];
-                    case 3: return [2 /*return*/];
+                        retrieved = _a.sent();
+                        if (retrieved)
+                            res.status(200).send("Budget for '" + req.user.email + "' is: " + retrieved.budget);
+                        else
+                            res.status(404).send("User '" + req.user.email + "' not found");
+                        return [2 /*return*/];
                 }
             });
         }); };
         this.createDataset = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+            var yourDatasets, datasets;
             return __generator(this, function (_a) {
-                if (datasetModel.newDataset(req.user.email, req.user.datasetName))
-                    res.status(200).send("Dataset '" + req.user.datasetName + "' created");
-                else
-                    res.sendStatus(400);
-                return [2 /*return*/];
+                switch (_a.label) {
+                    case 0:
+                        yourDatasets = [];
+                        return [4 /*yield*/, datasetModel.getDatasets(req.user.role, req.user.email)];
+                    case 1:
+                        datasets = _a.sent();
+                        datasets.forEach(function (item) {
+                            yourDatasets.push(item.dataValues.name);
+                        });
+                        if (yourDatasets.includes(req.user.dataset))
+                            res.status(400).send("Dataset '" + req.user.dataset + "' already exists for user: " + req.user.email);
+                        else if (datasetModel.newDataset(req.user.email, req.user.dataset))
+                            res.status(200).send("Dataset '" + req.user.dataset + "' created");
+                        else
+                            res.sendStatus(400);
+                        return [2 /*return*/];
+                }
+            });
+        }); };
+        this.renameDataset = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+            var yourDatasets, datasets;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        yourDatasets = [];
+                        return [4 /*yield*/, datasetModel.getDatasets(req.user.role, req.user.email)];
+                    case 1:
+                        datasets = _a.sent();
+                        datasets.forEach(function (item) {
+                            yourDatasets.push(item.dataValues.name);
+                        });
+                        if (yourDatasets.includes(req.user.newName))
+                            res.status(400).send("Dataset '" + req.user.dataset + "' already exists");
+                        else {
+                            if (datasetModel.updateDataset(req.user.dataset, req.user.newName))
+                                res.status(200).send("Dataset '" + req.user.dataset + "' renamed to: " + req.user.newName);
+                            else
+                                res.status(404).send("Dataset to rename doesn't exist");
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        }); };
+        this.upload = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+            var multer, path, img, product;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        multer = require('multer');
+                        path = require('path');
+                        img = {
+                            image: req.file.path,
+                            filename: req.file.filename,
+                        };
+                        return [4 /*yield*/, fileModel.saveImg(img)];
+                    case 1:
+                        product = _a.sent();
+                        return [2 /*return*/];
+                }
             });
         }); };
     }

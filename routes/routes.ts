@@ -57,10 +57,31 @@ router.get("/newDataset",
 	}
 );
 
-router.get("/myDatasets",
+router.get("/myDataset",
 	auth.checkUser,
 	async (req, res) => {
 		adminCnt.showDatasets(req,res);
+	}
+);
+
+router.get("/deleteDataset",
+	auth.checkUser,
+	async (req, res) => {
+		adminCnt.deleteDataset(req,res);
+	}
+);
+
+router.get("/renameDataset",
+	auth.checkUser,
+	async (req, res) => {
+		userCnt.renameDataset(req,res);
+	}
+);
+
+router.get("/upload",
+	auth.checkUser,
+	async (req, res) => {
+		userCnt.upload(req,res);
 	}
 );
 

@@ -28,6 +28,7 @@ const Dataset = sequelize.define(
 	}
 );
 
+
 export async function newDataset(owner: string, name: string ) {
 	try{
 		let ds = await Dataset.create({fk_user: owner, name: name});
@@ -38,15 +39,51 @@ export async function newDataset(owner: string, name: string ) {
 	}
 }
 
+
 export async function getDatasets(role: Number, owner: string ) {
+	let datasets:any;
+	let list = [];
 	try{
-		if(role == 0) return await Dataset.findAll();
-		else 
-			return await Dataset.findAll({
+		if(role == 0) //is an admin
+			datasets = await Dataset.findAll();
+		else
+			datasets = await Dataset.findAll({
 				where: { fk_user: owner }
 			});
+		/* datasets.forEach((item) => {
+			list.push(item.dataValues.name);
+		}); */
+		return datasets;
 	}
 	catch (err)	{
 		console.log(err);
+		return 0;
+	}
+}
+
+export async function deleteDataset(which: string ) {
+	try{
+		await Dataset.destroy({
+			where: { name: which }
+		});
+		return true;
+	}
+	catch (err)	{
+		console.log(err);
+		return false;
+	}
+}
+
+export async function updateDataset(which: string, newName: string ) {
+	try{
+		return await Dataset.update({ name: newName }, 
+			{ 
+				where: { name: which } 
+			}
+		);
+	}
+	catch (err)	{
+		console.log(err);
+		return false;
 	}
 }

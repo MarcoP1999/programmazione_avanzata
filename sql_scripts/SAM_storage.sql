@@ -20,9 +20,8 @@ CREATE TABLE IF NOT EXISTS public."Datasets"
 CREATE TABLE IF NOT EXISTS public."Files"
 (
     file_id SERIAL PRIMARY KEY,
-    fk_dataaset integer NOT NULL,
-    "filename" character varying(30),
-    "file" bytea
+    fk_dataset SERIAL NOT NULL,
+    filepath text
 );
 
 

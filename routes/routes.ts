@@ -25,17 +25,6 @@ let userCnt = new UserController();
 let adminCnt = new AdminController();
 
 
-router.get('/test', async (req, res) => {
-	res.send("test function");
-});
-
-router.get("/user",
-	auth.checkUser,
-	async (req, res) => {
-		res.status(200).send("Hello "+req.user.email);
-	}
-);
-
 router.get("/budget",
 	auth.checkUser,
 	async (req, res) => {
@@ -43,47 +32,49 @@ router.get("/budget",
 	}
 );
 
-router.get("/setBudget",
+router.patch("/budget",
 	auth.checkUser,
 	async (req, res) => {
 		adminCnt.setBudget(req,res);
 	}
 );
 
-router.get("/newDataset",
-	auth.checkUser,
-	async (req, res) => {
-		userCnt.createDataset(req,res);
-	}
-);
-
-router.get("/myDataset",
+router.get("/dataset",
 	auth.checkUser,
 	async (req, res) => {
 		adminCnt.showDatasets(req,res);
 	}
 );
 
-router.get("/deleteDataset",
+router.post("/dataset",
+	auth.checkUser,
+	async (req, res) => {
+		userCnt.createDataset(req,res);
+	}
+);
+
+router.delete("/dataset",
 	auth.checkUser,
 	async (req, res) => {
 		adminCnt.deleteDataset(req,res);
 	}
 );
 
-router.get("/renameDataset",
+router.patch("/dataset",
 	auth.checkUser,
 	async (req, res) => {
 		userCnt.renameDataset(req,res);
 	}
 );
 
-router.get("/upload",
+router.post("/upload",
 	auth.checkUser,
 	async (req, res) => {
+		console.log(req.body);
 		userCnt.upload(req,res);
 	}
 );
+
 
 //-------------------- Python ------------------------------------------
 import { PythonAdapter } from "../middleware/pythonAdapter";

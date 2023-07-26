@@ -1,7 +1,6 @@
 import * as userModel from "../model/Users.js";
 import * as datasetModel from "../model/Datasets.js";
-import * as fileModel from "../model/Files.js";
-
+import * as uploader from "../middleware/fileUploader.js";
 
 export class UserController{
 
@@ -21,7 +20,6 @@ export class UserController{
 		datasets.forEach((item) => {
 			yourDatasets.push(item.dataValues.name);
 		});
-		
 		if( yourDatasets.includes(req.user.dataset) )
 			res.status(400).send("Dataset '"+req.user.dataset+"' already exists for user: "+req.user.email);
 		else if( datasetModel.newDataset(req.user.email, req.user.dataset) )
@@ -49,15 +47,11 @@ export class UserController{
 	}
 
 	public upload = async (req, res) => {
-		const multer = require('multer');
-		const path = require('path');
-
-		let img = {
-			image: req.file.path,
-			filename: req.file.filename,
-		}
-		const product = await fileModel.saveImg(img);
+		let savedPath = await uploader.upload(req, res, req.user.file);
+		if( savedPath )
+			res.status(200).send("File '"+req.user.file+" ' uploaded in: "+savedPath);
+		else 	
+			res.status(400).send("DB writing error");
 	}
-
 
 }

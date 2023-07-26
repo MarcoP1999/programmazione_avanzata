@@ -59,70 +59,58 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AdminController = void 0;
-var userModel = __importStar(require("../model/Users.js"));
+exports.bill = exports.upload = void 0;
+var fileModel = __importStar(require("../model/Files.js"));
 var datasetModel = __importStar(require("../model/Datasets.js"));
-var AdminController = /** @class */ (function () {
-    function AdminController() {
-        var _this = this;
-        this.setBudget = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!(req.user.role == "0")) return [3 /*break*/, 2];
-                        return [4 /*yield*/, userModel.updateBudget(req.user.budget, req.user.receiver)];
-                    case 1:
-                        _a.sent();
-                        res.status(200).send("New budget for user " + req.user.receiver + " is " + req.user.budget);
-                        return [3 /*break*/, 3];
-                    case 2:
-                        res.status(401).send("User " + req.user.email + " not (admin) authorized!");
-                        _a.label = 3;
-                    case 3: return [2 /*return*/];
-                }
-            });
-        }); };
-        this.showDatasets = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-            var list, datasets;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        list = [];
-                        return [4 /*yield*/, datasetModel.getDatasets(req.user.role, req.user.email)];
-                    case 1:
-                        datasets = _a.sent();
-                        datasets.forEach(function (item) {
-                            list.push(item.dataValues.name);
-                        });
-                        if (req.user.role == 0)
-                            res.status(200).send("Available datasets are: " + String(list));
-                        else
-                            res.status(200).send(req.user.email + " your datasets are: " + String(list));
-                        return [2 /*return*/];
-                }
-            });
-        }); };
-        /* La verifica dei permessi di accesso è realizzato nel controller
-        * evitando di appesantire le funzionalità del Model, che rimane generico */
-        this.deleteDataset = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-            var yourDatasets;
-            return __generator(this, function (_a) {
-                if (req.user.role == "0") {
-                    datasetModel.deleteDataset(req.user.dataset);
-                    res.status(200).send("Admin deleted '" + req.user.dataset + "' dataset");
-                }
-                else {
-                    yourDatasets = datasetModel.getDatasets(req.user.role, req.user.email);
-                    if (req.user.dataset in yourDatasets)
-                        if (datasetModel.deleteDataset(req.user.dataset))
-                            res.status(200).send("Your dataset '" + req.user.dataset + "' has been removed");
-                        else
-                            res.status(401).send("User '" + req.user.email + "' can't remove dataset' " + req.user.dataset);
-                }
-                return [2 /*return*/];
-            });
-        }); };
-    }
-    return AdminController;
-}());
-exports.AdminController = AdminController;
+var uuid = require('crypto'); //UUID generator
+var fs = require('fs');
+var formidable = require('formidable');
+var form = new formidable.IncomingForm();
+function upload(req, res, currentPath) {
+    return __awaiter(this, void 0, void 0, function () {
+        var dataset, newPath;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, datasetModel.getDatasetIndex(req.user.dataset, req.user.email)];
+                case 1:
+                    dataset = _a.sent();
+                    newPath = "./images/" + uuid.randomUUID().toString() + ".jpg";
+                    form.parse(req, function (error, fields, file) {
+                        console.log("---Fields--");
+                        console.log(fields);
+                        try {
+                            //Copy the uploaded file to a custom folder
+                            fs.copyFile(currentPath, newPath, fs.constants.COPYFILE_EXCL, function () {
+                                return __awaiter(this, void 0, void 0, function () {
+                                    return __generator(this, function (_a) {
+                                        switch (_a.label) {
+                                            case 0:
+                                                console.log("File '" + currentPath + " ' copied to application path: " + newPath);
+                                                if (!!dataset) return [3 /*break*/, 1];
+                                                res.status(200).send("Dataset '" + req.user.dataset + "' not found");
+                                                return [2 /*return*/, false];
+                                            case 1: return [4 /*yield*/, fileModel.saveImg(dataset, newPath)];
+                                            case 2:
+                                                if (_a.sent())
+                                                    return [2 /*return*/, newPath];
+                                                _a.label = 3;
+                                            case 3: return [2 /*return*/];
+                                        }
+                                    });
+                                });
+                            });
+                        }
+                        catch (err) {
+                            console.log("File copy failed" + err);
+                            return false;
+                        }
+                    });
+                    return [2 /*return*/, newPath];
+            }
+        });
+    });
+}
+exports.upload = upload;
+function bill() {
+}
+exports.bill = bill;

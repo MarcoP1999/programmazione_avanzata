@@ -1,6 +1,5 @@
 import { DataTypes, Model, Sequelize } from "sequelize";
 import { SingletonDB } from "../model/Database";
-import { ErrorReply } from "redis";
 
 const sequelize = SingletonDB.getInstance().getConnection();
 
@@ -17,13 +16,9 @@ const Files = sequelize.define(
 			type: DataTypes.INTEGER,
 			allowNull: false
 		},
-		filename: {
+		filepath: {
 			type: DataTypes.STRING,
 			allowNull: false,
-		},
-		file: {
-			type: DataTypes.BLOB,
-			allowNull: false
 		}
 	},
 	{
@@ -33,10 +28,16 @@ const Files = sequelize.define(
 	}
 );
 
-export async function saveImg(img) {
+export async function saveImg(dataset_id, elementPath) {
 	try{
-		Files.create(img);
-		return true;
+		if( await Files.create(
+				{
+					fk_dataset: dataset_id,
+					filepath: elementPath
+				}
+			)
+		)	 return true;
+		else return false;
 	}
 	catch(err){
 		console.log(err);

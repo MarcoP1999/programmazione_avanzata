@@ -84,56 +84,45 @@ var UserController_js_1 = require("../controller/UserController.js");
 var AdminController_js_1 = require("../controller/AdminController.js");
 var userCnt = new UserController_js_1.UserController();
 var adminCnt = new AdminController_js_1.AdminController();
-router.get('/test', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        res.send("test function");
-        return [2 /*return*/];
-    });
-}); });
-router.get("/user", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        res.status(200).send("Hello " + req.user.email);
-        return [2 /*return*/];
-    });
-}); });
 router.get("/budget", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         userCnt.getBudget(req, res);
         return [2 /*return*/];
     });
 }); });
-router.get("/setBudget", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+router.patch("/budget", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         adminCnt.setBudget(req, res);
         return [2 /*return*/];
     });
 }); });
-router.get("/newDataset", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        userCnt.createDataset(req, res);
-        return [2 /*return*/];
-    });
-}); });
-router.get("/myDataset", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+router.get("/dataset", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         adminCnt.showDatasets(req, res);
         return [2 /*return*/];
     });
 }); });
-router.get("/deleteDataset", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+router.post("/dataset", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        userCnt.createDataset(req, res);
+        return [2 /*return*/];
+    });
+}); });
+router.delete("/dataset", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         adminCnt.deleteDataset(req, res);
         return [2 /*return*/];
     });
 }); });
-router.get("/renameDataset", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+router.patch("/dataset", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         userCnt.renameDataset(req, res);
         return [2 /*return*/];
     });
 }); });
-router.get("/upload", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+router.post("/upload", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
+        console.log(req.body);
         userCnt.upload(req, res);
         return [2 /*return*/];
     });

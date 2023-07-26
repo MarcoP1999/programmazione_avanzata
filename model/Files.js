@@ -51,31 +51,38 @@ var Files = sequelize.define("Files", {
         type: sequelize_1.DataTypes.INTEGER,
         allowNull: false
     },
-    filename: {
+    filepath: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
-    },
-    file: {
-        type: sequelize_1.DataTypes.BLOB,
-        allowNull: false
     }
 }, {
     timestamps: false,
     createdAt: false,
     updatedAt: false
 });
-function saveImg(img) {
+function saveImg(dataset_id, elementPath) {
     return __awaiter(this, void 0, void 0, function () {
+        var err_1;
         return __generator(this, function (_a) {
-            try {
-                Files.create(img);
-                return [2 /*return*/, true];
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, Files.create({
+                            fk_dataset: dataset_id,
+                            filepath: elementPath
+                        })];
+                case 1:
+                    if (_a.sent())
+                        return [2 /*return*/, true];
+                    else
+                        return [2 /*return*/, false];
+                    return [3 /*break*/, 3];
+                case 2:
+                    err_1 = _a.sent();
+                    console.log(err_1);
+                    return [2 /*return*/, false];
+                case 3: return [2 /*return*/];
             }
-            catch (err) {
-                console.log(err);
-                return [2 /*return*/, false];
-            }
-            return [2 /*return*/];
         });
     });
 }

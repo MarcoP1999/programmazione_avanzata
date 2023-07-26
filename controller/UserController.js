@@ -62,7 +62,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 var userModel = __importStar(require("../model/Users.js"));
 var datasetModel = __importStar(require("../model/Datasets.js"));
-var fileModel = __importStar(require("../model/Files.js"));
+var uploader = __importStar(require("../middleware/fileUploader.js"));
 var UserController = /** @class */ (function () {
     function UserController() {
         var _this = this;
@@ -130,19 +130,16 @@ var UserController = /** @class */ (function () {
             });
         }); };
         this.upload = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-            var multer, path, img, product;
+            var savedPath;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        multer = require('multer');
-                        path = require('path');
-                        img = {
-                            image: req.file.path,
-                            filename: req.file.filename,
-                        };
-                        return [4 /*yield*/, fileModel.saveImg(img)];
+                    case 0: return [4 /*yield*/, uploader.upload(req, res, req.user.file)];
                     case 1:
-                        product = _a.sent();
+                        savedPath = _a.sent();
+                        if (savedPath)
+                            res.status(200).send("File '" + req.user.file + " ' uploaded in: " + savedPath);
+                        else
+                            res.status(400).send("DB writing error");
                         return [2 /*return*/];
                 }
             });

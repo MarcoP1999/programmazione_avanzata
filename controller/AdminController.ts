@@ -19,7 +19,11 @@ export class AdminController{
 		datasets.forEach((item) => {
 			list.push(item.dataValues.name);
 		});
-		res.status(200).send("Available datasets are: "+ String(list) );
+		if(req.user.role == 0)
+			res.status(200).send("Available datasets are: "+ String(list) );
+		else
+			res.status(200).send(req.user.email+" your datasets are: "+ String(list) );
+
 	}
 
 

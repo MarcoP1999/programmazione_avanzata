@@ -50,14 +50,30 @@ export async function getDatasets(role: Number, owner: string ) {
 			datasets = await Dataset.findAll({
 				where: { fk_user: owner }
 			});
-		/* datasets.forEach((item) => {
-			list.push(item.dataValues.name);
-		}); */
 		return datasets;
 	}
 	catch (err)	{
 		console.log(err);
 		return 0;
+	}
+}
+
+export async function getDatasetIndex(dsName: string, owner: string ) {
+	
+	try{
+		let datasets:any = await Dataset.findOne(
+								{
+									attributes: ['dataset_id'],
+									where: 
+									{ 
+										fk_user: owner,
+										name: dsName
+									}
+								});
+		return datasets.dataValues.dataset_id;
+	}
+	catch (err)	{
+		console.log(err);
 	}
 }
 

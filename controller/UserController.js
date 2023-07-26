@@ -130,17 +130,24 @@ var UserController = /** @class */ (function () {
             });
         }); };
         this.upload = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-            var savedPath;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var savedPath, _a, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0: return [4 /*yield*/, uploader.upload(req, res, req.user.file)];
                     case 1:
-                        savedPath = _a.sent();
-                        if (savedPath)
-                            res.status(200).send("File '" + req.user.file + " ' uploaded in: " + savedPath);
-                        else
-                            res.status(400).send("DB writing error");
-                        return [2 /*return*/];
+                        savedPath = _d.sent();
+                        if (!savedPath) return [3 /*break*/, 3];
+                        _b = (_a = res.status(200)).send;
+                        _c = "File '" + req.user.file + " ' uploaded in: " + savedPath +
+                            "\nCurrent budget is: ";
+                        return [4 /*yield*/, userModel.getBudget(req.user.email)];
+                    case 2:
+                        _b.apply(_a, [_c + (_d.sent()).dataValues.budget]);
+                        return [3 /*break*/, 4];
+                    case 3:
+                        res.status(400).send("DB writing error");
+                        _d.label = 4;
+                    case 4: return [2 /*return*/];
                 }
             });
         }); };

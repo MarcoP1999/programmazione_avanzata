@@ -49,7 +49,8 @@ export class UserController{
 	public upload = async (req, res) => {
 		let savedPath = await uploader.upload(req, res, req.user.file);
 		if( savedPath )
-			res.status(200).send("File '"+req.user.file+" ' uploaded in: "+savedPath);
+			res.status(200).send("File '"+req.user.file+" ' uploaded in: "+savedPath+
+								"\nCurrent budget is: "+(await userModel.getBudget(req.user.email)).dataValues.budget);
 		else 	
 			res.status(400).send("DB writing error");
 	}

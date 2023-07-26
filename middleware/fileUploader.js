@@ -62,6 +62,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.bill = exports.upload = void 0;
 var fileModel = __importStar(require("../model/Files.js"));
 var datasetModel = __importStar(require("../model/Datasets.js"));
+var userModel = __importStar(require("../model/Users.js"));
 var uuid = require('crypto'); //UUID generator
 var fs = require('fs');
 var formidable = require('formidable');
@@ -75,11 +76,8 @@ function upload(req, res, currentPath) {
                 case 1:
                     dataset = _a.sent();
                     newPath = "./images/" + uuid.randomUUID().toString() + ".jpg";
-                    form.parse(req, function (error, fields, file) {
-                        console.log("---Fields--");
-                        console.log(fields);
+                    form.parse(req, function () {
                         try {
-                            //Copy the uploaded file to a custom folder
                             fs.copyFile(currentPath, newPath, fs.constants.COPYFILE_EXCL, function () {
                                 return __awaiter(this, void 0, void 0, function () {
                                     return __generator(this, function (_a) {
@@ -87,14 +85,19 @@ function upload(req, res, currentPath) {
                                             case 0:
                                                 console.log("File '" + currentPath + " ' copied to application path: " + newPath);
                                                 if (!!dataset) return [3 /*break*/, 1];
-                                                res.status(200).send("Dataset '" + req.user.dataset + "' not found");
+                                                res.status(404).send("Dataset '" + req.user.dataset + "' not found");
                                                 return [2 /*return*/, false];
                                             case 1: return [4 /*yield*/, fileModel.saveImg(dataset, newPath)];
                                             case 2:
+                                                if (!_a.sent()) return [3 /*break*/, 4];
+                                                return [4 /*yield*/, bill(req)];
+                                            case 3:
                                                 if (_a.sent())
                                                     return [2 /*return*/, newPath];
-                                                _a.label = 3;
-                                            case 3: return [2 /*return*/];
+                                                else
+                                                    res.status(401).send("Not enough credit for user " + req.user.email);
+                                                _a.label = 4;
+                                            case 4: return [2 /*return*/];
                                         }
                                     });
                                 });
@@ -111,6 +114,22 @@ function upload(req, res, currentPath) {
     });
 }
 exports.upload = upload;
-function bill() {
+function bill(req) {
+    return __awaiter(this, void 0, void 0, function () {
+        var currentBudget;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, userModel.getBudget(req.user.email)];
+                case 1:
+                    currentBudget = _a.sent();
+                    if (!(currentBudget.dataValues.budget >= 0.5)) return [3 /*break*/, 3];
+                    return [4 /*yield*/, userModel.updateBudget(currentBudget.dataValues.budget - 0.5, req.user.email)];
+                case 2:
+                    _a.sent();
+                    return [2 /*return*/, true];
+                case 3: return [2 /*return*/, false];
+            }
+        });
+    });
 }
 exports.bill = bill;

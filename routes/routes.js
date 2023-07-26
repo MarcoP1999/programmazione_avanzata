@@ -122,7 +122,6 @@ router.patch("/dataset", auth.checkUser, function (req, res) { return __awaiter(
 }); });
 router.post("/upload", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        console.log(req.body);
         userCnt.upload(req, res);
         return [2 /*return*/];
     });

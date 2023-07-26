@@ -70,8 +70,7 @@ router.patch("/dataset",
 router.post("/upload",
 	auth.checkUser,
 	async (req, res) => {
-		console.log(req.body);
-		userCnt.upload(req,res);
+		userCnt.upload(req,res)
 	}
 );
 

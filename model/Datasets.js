@@ -136,7 +136,7 @@ function getDatasetIndex(dsName, owner) {
                     err_3 = _a.sent();
                     console.log(err_3);
                     return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
+                case 3: return [2 /*return*/, 0];
             }
         });
     });

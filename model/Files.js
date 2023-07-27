@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveImg = void 0;
+exports.saveImgDB = void 0;
 var sequelize_1 = require("sequelize");
 var Database_1 = require("../model/Database");
 var sequelize = Database_1.SingletonDB.getInstance().getConnection();
@@ -60,7 +60,7 @@ var Files = sequelize.define("Files", {
     createdAt: false,
     updatedAt: false
 });
-function saveImg(dataset_id, elementPath) {
+function saveImgDB(dataset_id, elementPath) {
     return __awaiter(this, void 0, void 0, function () {
         var err_1;
         return __generator(this, function (_a) {
@@ -74,16 +74,14 @@ function saveImg(dataset_id, elementPath) {
                 case 1:
                     if (_a.sent())
                         return [2 /*return*/, true];
-                    else
-                        return [2 /*return*/, false];
                     return [3 /*break*/, 3];
                 case 2:
                     err_1 = _a.sent();
                     console.log(err_1);
-                    return [2 /*return*/, false];
-                case 3: return [2 /*return*/];
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/, false];
             }
         });
     });
 }
-exports.saveImg = saveImg;
+exports.saveImgDB = saveImgDB;

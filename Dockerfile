@@ -9,6 +9,7 @@ RUN npm install jsonwebtoken
 RUN npm install -g typescript
 RUN npm install fs
 RUN npm install formidable
+RUN npm install --save decompress-zip 
 RUN npm install python3.10
 RUN pip install -r ./python/requirements.txt
 RUN tsc

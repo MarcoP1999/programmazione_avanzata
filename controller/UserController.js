@@ -63,6 +63,7 @@ exports.UserController = void 0;
 var userModel = __importStar(require("../model/Users.js"));
 var datasetModel = __importStar(require("../model/Datasets.js"));
 var uploader = __importStar(require("../middleware/fileUploader.js"));
+var fileModel = __importStar(require("../model/Files.js"));
 var UserController = /** @class */ (function () {
     function UserController() {
         var _this = this;
@@ -129,25 +130,33 @@ var UserController = /** @class */ (function () {
                 }
             });
         }); };
-        this.upload = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-            var savedPath, _a, _b, _c;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
-                    case 0: return [4 /*yield*/, uploader.upload(req, res, req.user.file)];
+        this.upload = function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+            var uuid, _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        uuid = require('crypto');
+                        _a = req;
+                        return [4 /*yield*/, datasetModel.getDatasetIndex(req.user.dataset, req.user.email)];
                     case 1:
-                        savedPath = _d.sent();
-                        if (!savedPath) return [3 /*break*/, 3];
-                        _b = (_a = res.status(200)).send;
-                        _c = "File '" + req.user.file + " ' uploaded in: " + savedPath +
-                            "\nCurrent budget is: ";
-                        return [4 /*yield*/, userModel.getBudget(req.user.email)];
+                        _a.datasetIndex = _c.sent();
+                        req.uploader.FSpath = "./images/" + uuid.randomUUID().toString() + ".jpg";
+                        return [4 /*yield*/, uploader.upload(req, res, next)];
                     case 2:
-                        _b.apply(_a, [_c + (_d.sent()).dataValues.budget]);
-                        return [3 /*break*/, 4];
+                        _c.sent();
+                        return [4 /*yield*/, fileModel.saveImgDB(req.uploader.datasetIndex, req.uploader.FSpath)];
                     case 3:
-                        res.status(400).send("DB writing error");
-                        _d.label = 4;
-                    case 4: return [2 /*return*/];
+                        if (!_c.sent()) return [3 /*break*/, 5];
+                        _b = req.user;
+                        return [4 /*yield*/, userModel.updateBudget(req.uploader.currentBudget - 0.5, req.user.email)];
+                    case 4:
+                        _b.currentBudget = _c.sent();
+                        _c.label = 5;
+                    case 5:
+                        if (req.user.currentBudget)
+                            res.status(200).send("File '" + req.user.files + " ' uploaded in: " + req.uploader.imagePath +
+                                "\nCurrent budget is: " + req.user.currentBudget);
+                        return [2 /*return*/];
                 }
             });
         }); };

@@ -1,6 +1,7 @@
 import * as userModel from "../model/Users.js";
 import * as datasetModel from "../model/Datasets.js";
 import * as uploader from "../middleware/fileUploader.js";
+import * as fileModel from "../model/Files.js";
 
 export class UserController{
 
@@ -46,13 +47,18 @@ export class UserController{
 		}
 	}
 
-	public upload = async (req, res) => {
-		let savedPath = await uploader.upload(req, res, req.user.file);
-		if( savedPath )
-			res.status(200).send("File '"+req.user.file+" ' uploaded in: "+savedPath+
-								"\nCurrent budget is: "+(await userModel.getBudget(req.user.email)).dataValues.budget);
-		else 	
-			res.status(400).send("DB writing error");
+	public upload = async (req, res, next) => {
+		const uuid = require('crypto');
+
+		req.uploader.datasetIndex = await datasetModel.getDatasetIndex(req.user.dataset, req.user.email);
+		req.uploader.FSpath = "./images/" + uuid.randomUUID().toString() + ".jpg";
+
+		await uploader.upload(req, res, next);
+		if( await fileModel.saveImgDB(req.uploader.datasetIndex, req.uploader.FSpath) )
+			req.user.currentBudget = await userModel.updateBudget(req.uploader.currentBudget - 0.5, req.user.email);
+		if( req.user.currentBudget )
+			res.status(200).send("File '"+req.user.files+" ' uploaded in: "+req.uploader.imagePath+
+							"\nCurrent budget is: "+req.user.currentBudget);
 	}
 
 }

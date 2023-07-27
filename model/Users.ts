@@ -60,9 +60,9 @@ export async function updateBudget(newBudget: Number, usermail: string) {
 			{	budget: newBudget	},
 			{	where: { email: usermail}	}
 		);
-	  } 
-	  catch (err) {
-			console.log(err);
-	  }
-	
+	} 
+	catch (err) {
+		console.log(err);
+	}
+	return newBudget;
 }

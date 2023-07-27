@@ -108,7 +108,7 @@ router.post("/dataset", auth.checkUser, function (req, res) { return __awaiter(v
         return [2 /*return*/];
     });
 }); });
-router.delete("/dataset", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+router.delete("/dataset", auth.checkUser, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         adminCnt.deleteDataset(req, res);
         return [2 /*return*/];
@@ -120,9 +120,9 @@ router.patch("/dataset", auth.checkUser, function (req, res) { return __awaiter(
         return [2 /*return*/];
     });
 }); });
-router.post("/upload", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+router.post("/upload", auth.checkUser, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        userCnt.upload(req, res);
+        userCnt.upload(req, res, next);
         return [2 /*return*/];
     });
 }); });

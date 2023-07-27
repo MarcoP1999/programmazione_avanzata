@@ -75,6 +75,7 @@ export async function getDatasetIndex(dsName: string, owner: string ) {
 	catch (err)	{
 		console.log(err);
 	}
+	return 0;
 }
 
 export async function deleteDataset(which: string ) {

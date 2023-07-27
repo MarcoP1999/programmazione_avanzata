@@ -119,7 +119,7 @@ function updateBudget(newBudget, usermail) {
                     err_1 = _a.sent();
                     console.log(err_1);
                     return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
+                case 3: return [2 /*return*/, newBudget];
             }
         });
     });

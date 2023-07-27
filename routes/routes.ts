@@ -55,7 +55,7 @@ router.post("/dataset",
 
 router.delete("/dataset",
 	auth.checkUser,
-	async (req, res) => {
+	async (req, res, next) => {
 		adminCnt.deleteDataset(req,res);
 	}
 );
@@ -69,8 +69,8 @@ router.patch("/dataset",
 
 router.post("/upload",
 	auth.checkUser,
-	async (req, res) => {
-		userCnt.upload(req,res)
+	async (req, res, next) => {
+		userCnt.upload(req, res, next);
 	}
 );
 

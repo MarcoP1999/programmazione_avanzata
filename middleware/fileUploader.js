@@ -59,62 +59,46 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.bill = exports.upload = void 0;
-var fileModel = __importStar(require("../model/Files.js"));
-var datasetModel = __importStar(require("../model/Datasets.js"));
+exports.upload = void 0;
 var userModel = __importStar(require("../model/Users.js"));
-var uuid = require('crypto'); //UUID generator
 var fs = require('fs');
-var formidable = require('formidable');
-var form = new formidable.IncomingForm();
-function upload(req, res, currentPath) {
+var path = require('path');
+var DecompressZip = require('decompress-zip');
+function upload(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var dataset, newPath;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, datasetModel.getDatasetIndex(req.user.dataset, req.user.email)];
+        var accepted_extensions, _a;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    accepted_extensions = [".jpg", ".jpeg", ".bmp", ".png", ".zip"];
+                    if (!accepted_extensions.includes(path.extname(req.user.files))) return [3 /*break*/, 5];
+                    if (!(path.extname(req.user.files) == ".zip")) return [3 /*break*/, 2];
+                    return [4 /*yield*/, extractZip(req, res, next)];
                 case 1:
-                    dataset = _a.sent();
-                    newPath = "./images/" + uuid.randomUUID().toString() + ".jpg";
-                    form.parse(req, function () {
-                        try {
-                            fs.copyFile(currentPath, newPath, fs.constants.COPYFILE_EXCL, function () {
-                                return __awaiter(this, void 0, void 0, function () {
-                                    return __generator(this, function (_a) {
-                                        switch (_a.label) {
-                                            case 0:
-                                                console.log("File '" + currentPath + " ' copied to application path: " + newPath);
-                                                if (!!dataset) return [3 /*break*/, 1];
-                                                res.status(404).send("Dataset '" + req.user.dataset + "' not found");
-                                                return [2 /*return*/, false];
-                                            case 1: return [4 /*yield*/, fileModel.saveImg(dataset, newPath)];
-                                            case 2:
-                                                if (!_a.sent()) return [3 /*break*/, 4];
-                                                return [4 /*yield*/, bill(req)];
-                                            case 3:
-                                                if (_a.sent())
-                                                    return [2 /*return*/, newPath];
-                                                else
-                                                    res.status(401).send("Not enough credit for user " + req.user.email);
-                                                _a.label = 4;
-                                            case 4: return [2 /*return*/];
-                                        }
-                                    });
-                                });
-                            });
-                        }
-                        catch (err) {
-                            console.log("File copy failed" + err);
-                            return false;
-                        }
-                    });
-                    return [2 /*return*/, newPath];
+                    _b.sent(),
+                        fs.readdir("./unzipped", function (err, files) {
+                            console.log(files.length);
+                        });
+                    bill(req, res, next);
+                    return [3 /*break*/, 4];
+                case 2:
+                    bill(req, res, next);
+                    _a = req.uploader;
+                    return [4 /*yield*/, saveImgFS(req, res, next)];
+                case 3:
+                    _a.imagePath = _b.sent();
+                    _b.label = 4;
+                case 4: return [3 /*break*/, 6];
+                case 5:
+                    res.send(400).send("File " + req.user.files + " unsupported");
+                    _b.label = 6;
+                case 6: return [2 /*return*/];
             }
         });
     });
 }
 exports.upload = upload;
-function bill(req) {
+function bill(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var currentBudget;
         return __generator(this, function (_a) {
@@ -122,14 +106,60 @@ function bill(req) {
                 case 0: return [4 /*yield*/, userModel.getBudget(req.user.email)];
                 case 1:
                     currentBudget = _a.sent();
-                    if (!(currentBudget.dataValues.budget >= 0.5)) return [3 /*break*/, 3];
-                    return [4 /*yield*/, userModel.updateBudget(currentBudget.dataValues.budget - 0.5, req.user.email)];
-                case 2:
-                    _a.sent();
-                    return [2 /*return*/, true];
-                case 3: return [2 /*return*/, false];
+                    if (currentBudget.dataValues.budget >= 0.5 * req.user.files.length) {
+                        req.uploader.currentBudget = currentBudget.dataValues.budget;
+                        next();
+                    }
+                    else
+                        res.status(401).send("Not enough credit for user: " + req.user.email);
+                    return [2 /*return*/];
             }
         });
     });
 }
-exports.bill = bill;
+function saveImgFS(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            try {
+                fs.copyFile(req.user.files, req.uploader.FSpath, fs.constants.COPYFILE_EXCL, function () {
+                    return __awaiter(this, void 0, void 0, function () {
+                        return __generator(this, function (_a) {
+                            console.log("File '" + req.user.files + " ' copied to application path: " + req.uploader.FSpath);
+                            if (!req.uploader.datasetIndex)
+                                res.status(404).send("Dataset '" + req.user.dataset + "' not found");
+                            else
+                                next();
+                            return [2 /*return*/];
+                        });
+                    });
+                });
+            }
+            catch (err) {
+                res.status(404).send("File '" + req.uploader.FSpath + "' copy to FileSystem failed");
+            }
+            return [2 /*return*/];
+        });
+    });
+}
+function extractZip(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var unzipper;
+        return __generator(this, function (_a) {
+            unzipper = new DecompressZip(req.user.files);
+            fs.readFile(req.user.files, function (err, data) {
+                if (err)
+                    res.status(400).send("Failed reading: " + req.user.files);
+                unzipper.extract({
+                    path: "./unzipped/"
+                });
+            });
+            unzipper.on('extract', function (log) {
+                console.log('log es', log);
+                console.log('Extracted');
+                next();
+            });
+            next();
+            return [2 /*return*/];
+        });
+    });
+}

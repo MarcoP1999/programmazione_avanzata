@@ -58,29 +58,3 @@ export async function checkOwner(req, res, next) {
 	else 
 		res.status(401).send("User "+req.user.email+" not authorized to access here!");
 }
-
-/* export const valore = (variabile, object) => {
-  // se la variabile corrente è dentro binaries o generals costerà 0.1, altrimenti 0.05
-  if (object.binaries && object.binaries.includes(variabile)) {
-	return 0.1;
-  } else if (object.generals && object.generals.includes(variabile)) { 
-	return 0.1;
-  } else {
-	return 0.05;
-  }
-};
-
-export async function checkCredito(req, res, next) {
-	try {
-	let object = req.body;
-	let totalCost: number = costContraint(object) + checkBinOrInt(object);
-	const budget: any = await User.getBudget(req.user.email);
-	if (budget.budget > totalCost) { // vediamo se c'è credito a sufficienza
-		next();
-	} else {
-		res.sendStatus(401);
-	}
-	} catch (e) {
-		res.sendStatus(401);
-	}
-}*/

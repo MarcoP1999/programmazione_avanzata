@@ -108,7 +108,7 @@ router.post("/dataset", auth.checkUser, function (req, res) { return __awaiter(v
         return [2 /*return*/];
     });
 }); });
-router.delete("/dataset", auth.checkUser, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+router.delete("/dataset", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         adminCnt.deleteDataset(req, res);
         return [2 /*return*/];
@@ -120,12 +120,13 @@ router.patch("/dataset", auth.checkUser, function (req, res) { return __awaiter(
         return [2 /*return*/];
     });
 }); });
-router.post("/upload", auth.checkUser, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+var uploader = __importStar(require("../middleware/fileUploader.js"));
+router.post("/upload", auth.checkUser, uploader.checkFormat, uploader.unpackZip, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         userCnt.upload(req, res, next);
         return [2 /*return*/];
     });
-}); });
+}); }, uploader.bill, uploader.saveImgFS);
 //-------------------- Python ------------------------------------------
 var pythonAdapter_1 = require("../middleware/pythonAdapter");
 var adapter = new pythonAdapter_1.PythonAdapter();

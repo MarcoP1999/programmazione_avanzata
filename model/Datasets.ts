@@ -58,7 +58,7 @@ export async function getDatasets(role: Number, owner: string ) {
 	}
 }
 
-export async function getDatasetIndex(dsName: string, owner: string ) {
+export async function getdatasetPK(dsName: string, owner: string ) {
 	
 	try{
 		let datasets:any = await Dataset.findOne(

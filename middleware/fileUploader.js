@@ -59,45 +59,71 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.upload = void 0;
+exports.checkFormat = exports.bill = exports.saveImgFS = exports.unpackZip = exports.upload = void 0;
 var userModel = __importStar(require("../model/Users.js"));
 var fs = require('fs');
 var path = require('path');
 var DecompressZip = require('decompress-zip');
 function upload(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var accepted_extensions, _a;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    accepted_extensions = [".jpg", ".jpeg", ".bmp", ".png", ".zip"];
-                    if (!accepted_extensions.includes(path.extname(req.user.files))) return [3 /*break*/, 5];
-                    if (!(path.extname(req.user.files) == ".zip")) return [3 /*break*/, 2];
-                    return [4 /*yield*/, extractZip(req, res, next)];
-                case 1:
-                    _b.sent(),
-                        fs.readdir("./unzipped", function (err, files) {
-                            console.log(files.length);
-                        });
-                    bill(req, res, next);
-                    return [3 /*break*/, 4];
-                case 2:
-                    bill(req, res, next);
-                    _a = req.uploader;
-                    return [4 /*yield*/, saveImgFS(req, res, next)];
-                case 3:
-                    _a.imagePath = _b.sent();
-                    _b.label = 4;
-                case 4: return [3 /*break*/, 6];
-                case 5:
-                    res.send(400).send("File " + req.user.files + " unsupported");
-                    _b.label = 6;
-                case 6: return [2 /*return*/];
-            }
+        return __generator(this, function (_a) {
+            return [2 /*return*/];
         });
     });
 }
 exports.upload = upload;
+function unpackZip(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var unzipper_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (!(path.extname(req.user.file[0]) == ".zip")) return [3 /*break*/, 2];
+                    console.log("is a zip");
+                    unzipper_1 = new DecompressZip(req.user.file[0]);
+                    return [4 /*yield*/, fs.readFile(req.user.file[0], function (err, data) {
+                            console.log("unzipping");
+                            if (err)
+                                return res.status(400).send("Failed reading: " + req.user.file[0]);
+                            unzipper_1.extract({ path: "./unzipped/" });
+                        })];
+                case 1:
+                    _a.sent();
+                    unzipper_1.on('progress', function (fileIndex, fileCount) {
+                        console.log('Extracted file ' + (fileIndex + 1) + ' of ' + fileCount);
+                    });
+                    unzipper_1.on('extract', function (log) {
+                        console.log('log es', log);
+                        console.log('Extracted');
+                        return next();
+                    });
+                    return [2 /*return*/, next()];
+                case 2:
+                    next();
+                    _a.label = 3;
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.unpackZip = unpackZip;
+function saveImgFS(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            try {
+                fs.copyFile(req.user.file, req.FSpath, fs.constants.COPYFILE_EXCL, function () {
+                    console.log("File '" + req.user.file + " ' copied to application path: " + req.FSpath);
+                    return next();
+                });
+            }
+            catch (err) {
+                res.status(404).send("File '" + req.FSpath + "' copy to FileSystem failed");
+            }
+            return [2 /*return*/];
+        });
+    });
+}
+exports.saveImgFS = saveImgFS;
 function bill(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var currentBudget;
@@ -106,60 +132,37 @@ function bill(req, res, next) {
                 case 0: return [4 /*yield*/, userModel.getBudget(req.user.email)];
                 case 1:
                     currentBudget = _a.sent();
-                    if (currentBudget.dataValues.budget >= 0.5 * req.user.files.length) {
-                        req.uploader.currentBudget = currentBudget.dataValues.budget;
+                    console.log("current budget" + currentBudget.dataValues.budget);
+                    console.log("n of files" + req.user.file.length);
+                    if (currentBudget.dataValues.budget >= 0.5 * req.user.file.length) {
+                        req.currentBudget = currentBudget.dataValues.budget;
+                        req.budgetProposal = currentBudget.dataValues.budget - (0.5 * req.user.file.length);
+                        console.log("budget proposal" + req.budgetProposal);
                         next();
                     }
-                    else
+                    else {
+                        console.log("Not enough credit for user");
                         res.status(401).send("Not enough credit for user: " + req.user.email);
+                    }
                     return [2 /*return*/];
             }
         });
     });
 }
-function saveImgFS(req, res, next) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            try {
-                fs.copyFile(req.user.files, req.uploader.FSpath, fs.constants.COPYFILE_EXCL, function () {
-                    return __awaiter(this, void 0, void 0, function () {
-                        return __generator(this, function (_a) {
-                            console.log("File '" + req.user.files + " ' copied to application path: " + req.uploader.FSpath);
-                            if (!req.uploader.datasetIndex)
-                                res.status(404).send("Dataset '" + req.user.dataset + "' not found");
-                            else
-                                next();
-                            return [2 /*return*/];
-                        });
-                    });
-                });
-            }
-            catch (err) {
-                res.status(404).send("File '" + req.uploader.FSpath + "' copy to FileSystem failed");
-            }
-            return [2 /*return*/];
-        });
+exports.bill = bill;
+function checkFormat(req, res, next) {
+    var accepted_extensions = [".jpg", ".jpeg", ".bmp", ".png", ".zip"];
+    var accepted = true;
+    req.user.file.forEach(function (element) {
+        console.log("Current file is " + element);
+        if (!accepted_extensions.includes(path.extname(element)))
+            accepted = false;
     });
+    if (accepted) {
+        console.log("checkFormat OK");
+        next();
+    }
+    else
+        res.status(400).send("Files unsupported" + req.user.file);
 }
-function extractZip(req, res, next) {
-    return __awaiter(this, void 0, void 0, function () {
-        var unzipper;
-        return __generator(this, function (_a) {
-            unzipper = new DecompressZip(req.user.files);
-            fs.readFile(req.user.files, function (err, data) {
-                if (err)
-                    res.status(400).send("Failed reading: " + req.user.files);
-                unzipper.extract({
-                    path: "./unzipped/"
-                });
-            });
-            unzipper.on('extract', function (log) {
-                console.log('log es', log);
-                console.log('Extracted');
-                next();
-            });
-            next();
-            return [2 /*return*/];
-        });
-    });
-}
+exports.checkFormat = checkFormat;

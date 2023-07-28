@@ -7,66 +7,86 @@ const DecompressZip = require('decompress-zip');
 
 
 export async function upload(req, res, next) {
-	const accepted_extensions = [".jpg",".jpeg",".bmp",".png",".zip"]
- 
-	if( accepted_extensions.includes( path.extname(req.user.files) ) ){
-		if(path.extname(req.user.files) == ".zip"){
-			await extractZip(req, res, next),
-			fs.readdir("./unzipped", (err, files) => {
-				console.log(files.length);
-			});
-			bill(req,res, next)
-		}
-		else{ //is an image
-			bill(req, res, next),
-			req.uploader.imagePath = await saveImgFS(req, res, next);
-		}
+	
+	/*else{ //is an image
+		bill(req, res, next),
+		await saveImgFS(req, res, next);
+	}*/
+}
+
+export async function unpackZip(req, res, next){
+	if(path.extname(req.user.file[0]) == ".zip"){
+		console.log("is a zip");
+		
+		let unzipper = new DecompressZip( req.user.file[0] );
+
+		await fs.readFile( req.user.file[0], (err, data) => {
+			console.log("file read")
+			if (err) 
+				return res.status(400).send("Failed reading: "+req.user.file[0]);
+			
+			unzipper.extract( {path: "./unzipped/"} ); 
+		});
+
+		unzipper.on('progress', function (fileIndex, fileCount) {
+			console.log('Extracted file ' + (fileIndex + 1) + ' of ' + fileCount);         
+		});
+
+		unzipper.on('extract', function (log) {
+			console.log('log es', log);
+			console.log('Extracted');
+			return next();
+		});
+		return next();
+		//bill(req,res, next)
 	}
-	else 
-		res.send(400).send("File "+req.user.files+" unsupported");
+	else next();
 }
 
 
-async function bill(req, res, next){
-	let currentBudget = await userModel.getBudget(req.user.email)
-
-	if(currentBudget.dataValues.budget >= 0.5*req.user.files.length){
-		req.uploader.currentBudget = currentBudget.dataValues.budget;
-		next();
-	}
-	else
-		res.status(401).send("Not enough credit for user: "+req.user.email)
-}
-
-async function saveImgFS(req, res, next){
+export async function saveImgFS(req, res, next){
 	try{
-		fs.copyFile(req.user.files, req.uploader.FSpath, fs.constants.COPYFILE_EXCL, async function () {
-			console.log("File '"+req.user.files+" ' copied to application path: "+ req.uploader.FSpath);
-			if(! req.uploader.datasetIndex)
-				res.status(404).send("Dataset '"+req.user.dataset+"' not found");
-			else
-				next();
+		fs.copyFile(req.user.file, req.FSpath, fs.constants.COPYFILE_EXCL, function () {
+			console.log("File '"+req.user.file+" ' copied to application path: "+ req.FSpath);
+			return next();
 		});
 	}
 	catch(err){
-		res.status(404).send("File '"+req.uploader.FSpath+"' copy to FileSystem failed");
+		res.status(404).send("File '"+req.FSpath+"' copy to FileSystem failed");
 	}
 } 
 
-async function extractZip(req, res, next) {
-	let unzipper = new DecompressZip( req.user.files );
 
-	fs.readFile( req.user.files, (err, data) => {
-		if (err)  res.status(400).send("Failed reading: "+req.user.files)
-
-		unzipper.extract({
-			path: "./unzipped/"
-		}); 
-	});
-	unzipper.on('extract', function (log) {
-		console.log('log es', log);
-		console.log('Extracted');
+export async function bill(req, res, next){
+	let currentBudget = await userModel.getBudget(req.user.email)
+	console.log("current budget"+ currentBudget.dataValues.budget);
+	console.log("n of files"+req.user.file.length)
+	if(currentBudget.dataValues.budget >= 0.5*req.user.file.length){
+		req.currentBudget = currentBudget.dataValues.budget;
+		req.budgetProposal = currentBudget.dataValues.budget - (0.5*req.user.file.length);
+		console.log("budget proposal"+ req.budgetProposal)
 		next();
-	});
-	next();
+	}
+	else{
+		console.log("Not enough credit for user")
+		res.status(401).send("Not enough credit for user: "+req.user.email)
+	}
+}
+
+
+export function checkFormat(req, res, next) {
+	const accepted_extensions = [".jpg",".jpeg",".bmp",".png",".zip"];
+	let accepted = true;
+	req.user.file.forEach( 
+			function(element){
+				console.log("Current file is "+ element)
+				if(! accepted_extensions.includes( path.extname(element) ) )
+					accepted = false;
+			}
+		)
+	if(accepted){
+		console.log("checkFormat OK");
+		next();
+	}
+	else res.status(400).send("Files unsupported"+req.user.file);
 }

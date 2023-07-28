@@ -52,7 +52,7 @@ var Files = sequelize.define("Files", {
         allowNull: false
     },
     filepath: {
-        type: sequelize_1.DataTypes.STRING,
+        type: sequelize_1.DataTypes.TEXT,
         allowNull: false,
     }
 }, {
@@ -71,10 +71,7 @@ function saveImgDB(dataset_id, elementPath) {
                             fk_dataset: dataset_id,
                             filepath: elementPath
                         })];
-                case 1:
-                    if (_a.sent())
-                        return [2 /*return*/, true];
-                    return [3 /*break*/, 3];
+                case 1: return [2 /*return*/, _a.sent()];
                 case 2:
                     err_1 = _a.sent();
                     console.log(err_1);

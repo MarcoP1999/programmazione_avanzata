@@ -5,6 +5,7 @@ router.use(express.json());
 
 //----------------- AUTH ------------------------------------------
 import * as auth from "../middleware/authorization.js";
+
 router.use( [auth.checkHeader, auth.checkToken, auth.verifyAndAuthenticate] );
 
 router.use((err, req, res, next) => {
@@ -55,7 +56,7 @@ router.post("/dataset",
 
 router.delete("/dataset",
 	auth.checkUser,
-	async (req, res, next) => {
+	async (req, res) => {
 		adminCnt.deleteDataset(req,res);
 	}
 );
@@ -67,11 +68,17 @@ router.patch("/dataset",
 	}
 );
 
+import * as uploader from "../middleware/fileUploader.js";
+
 router.post("/upload",
 	auth.checkUser,
+	uploader.checkFormat,
+	uploader.unpackZip,
 	async (req, res, next) => {
 		userCnt.upload(req, res, next);
-	}
+	},
+	uploader.bill,
+	uploader.saveImgFS,
 );
 
 

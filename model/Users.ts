@@ -55,14 +55,8 @@ export async function checkUser(email: string) {
    * @param email l'email dell'utente
    */
 export async function updateBudget(newBudget: Number, usermail: string) {
-	try {
-		await Users.update(
+	return await Users.update(
 			{	budget: newBudget	},
 			{	where: { email: usermail}	}
-		);
-	} 
-	catch (err) {
-		console.log(err);
-	}
-	return newBudget;
+	);
 }

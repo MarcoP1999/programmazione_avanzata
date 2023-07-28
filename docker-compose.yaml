@@ -13,7 +13,7 @@ services:
             - 5432:5432
         volumes: 
             # copy the sql script to create tables
-            - ./sql_scripts/SAM_storage.sql:/docker-entrypoint-initdb.d/SAM_storage.sql
+            - ./SQL/SAM_storage.sql:/docker-entrypoint-initdb.d/SAM_storage.sql
     cache:
             image: redis:7-alpine
             restart: always

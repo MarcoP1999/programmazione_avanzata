@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateDataset = exports.deleteDataset = exports.getDatasetIndex = exports.getDatasets = exports.newDataset = void 0;
+exports.updateDataset = exports.deleteDataset = exports.getdatasetPK = exports.getDatasets = exports.newDataset = void 0;
 var sequelize_1 = require("sequelize");
 var Database_1 = require("../model/Database");
 var sequelize = Database_1.SingletonDB.getInstance().getConnection();
@@ -115,7 +115,7 @@ function getDatasets(role, owner) {
     });
 }
 exports.getDatasets = getDatasets;
-function getDatasetIndex(dsName, owner) {
+function getdatasetPK(dsName, owner) {
     return __awaiter(this, void 0, void 0, function () {
         var datasets, err_3;
         return __generator(this, function (_a) {
@@ -141,7 +141,7 @@ function getDatasetIndex(dsName, owner) {
         });
     });
 }
-exports.getDatasetIndex = getDatasetIndex;
+exports.getdatasetPK = getdatasetPK;
 function deleteDataset(which) {
     return __awaiter(this, void 0, void 0, function () {
         var err_4;

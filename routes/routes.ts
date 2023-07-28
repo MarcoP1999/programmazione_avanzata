@@ -74,11 +74,10 @@ router.post("/upload",
 	auth.checkUser,
 	uploader.checkFormat,
 	uploader.unpackZip,
+	uploader.bill,
 	async (req, res, next) => {
 		userCnt.upload(req, res, next);
-	},
-	uploader.bill,
-	uploader.saveImgFS,
+	}
 );
 
 

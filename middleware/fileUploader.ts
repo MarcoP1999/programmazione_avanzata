@@ -3,51 +3,12 @@ import * as userModel from "../model/Users.js";
 
 let fs = require('fs');
 let path = require('path')
-const DecompressZip = require('decompress-zip');
+let AdmZip = require("adm-zip");
 
-
-export async function upload(req, res, next) {
-	
-	/*else{ //is an image
-		bill(req, res, next),
-		await saveImgFS(req, res, next);
-	}*/
-}
-
-export async function unpackZip(req, res, next){
-	if(path.extname(req.user.file[0]) == ".zip"){
-		console.log("is a zip");
-		
-		let unzipper = new DecompressZip( req.user.file[0] );
-
-		await fs.readFile( req.user.file[0], (err, data) => {
-			console.log("file read")
-			if (err) 
-				return res.status(400).send("Failed reading: "+req.user.file[0]);
-			
-			unzipper.extract( {path: "./unzipped/"} ); 
-		});
-
-		unzipper.on('progress', function (fileIndex, fileCount) {
-			console.log('Extracted file ' + (fileIndex + 1) + ' of ' + fileCount);         
-		});
-
-		unzipper.on('extract', function (log) {
-			console.log('log es', log);
-			console.log('Extracted');
-			return next();
-		});
-		return next();
-		//bill(req,res, next)
-	}
-	else next();
-}
-
-
-export async function saveImgFS(req, res, next){
+export async function saveImgFS(req, res, next, current){
 	try{
-		fs.copyFile(req.user.file, req.FSpath, fs.constants.COPYFILE_EXCL, function () {
-			console.log("File '"+req.user.file+" ' copied to application path: "+ req.FSpath);
+		fs.copyFile(req.user.files[current], req.FSpath, fs.constants.COPYFILE_EXCL, function () {
+			console.log("File '"+req.user.files[current]+" ' copied to application path: "+ req.FSpath);
 			return next();
 		});
 	}
@@ -59,12 +20,12 @@ export async function saveImgFS(req, res, next){
 
 export async function bill(req, res, next){
 	let currentBudget = await userModel.getBudget(req.user.email)
-	console.log("current budget"+ currentBudget.dataValues.budget);
-	console.log("n of files"+req.user.file.length)
-	if(currentBudget.dataValues.budget >= 0.5*req.user.file.length){
+	console.log("current budget: "+ currentBudget.dataValues.budget);
+	console.log("n of files: "+req.user.files.length)
+	if(currentBudget.dataValues.budget >= 0.5*req.user.files.length){
 		req.currentBudget = currentBudget.dataValues.budget;
-		req.budgetProposal = currentBudget.dataValues.budget - (0.5*req.user.file.length);
-		console.log("budget proposal"+ req.budgetProposal)
+		req.budgetProposal = currentBudget.dataValues.budget - (0.5*req.user.files.length);
+		console.log("budget proposal: "+ req.budgetProposal)
 		next();
 	}
 	else{
@@ -77,7 +38,7 @@ export async function bill(req, res, next){
 export function checkFormat(req, res, next) {
 	const accepted_extensions = [".jpg",".jpeg",".bmp",".png",".zip"];
 	let accepted = true;
-	req.user.file.forEach( 
+	req.user.files.forEach( 
 			function(element){
 				console.log("Current file is "+ element)
 				if(! accepted_extensions.includes( path.extname(element) ) )
@@ -88,5 +49,31 @@ export function checkFormat(req, res, next) {
 		console.log("checkFormat OK");
 		next();
 	}
-	else res.status(400).send("Files unsupported"+req.user.file);
+	else res.status(400).send("Files unsupported"+req.user.files);
+}
+
+
+export async function unpackZip(req, res, next){
+	if( path.extname( req.user.files[0] ) == ".zip" ){
+		console.log("is a zip");
+		
+		let zip = new AdmZip( req.user.files[0] );
+		var zipEntries = zip.getEntries();
+		await zip.extractAllTo("./unzipped", true);
+
+		updateFilesList(req, zipEntries);
+		next();
+	}
+	else //was an image => skipping
+		next();
+}
+
+
+function updateFilesList(req, elemList){
+	req.user.files = []; //clear request file list => not a zip anymore
+
+	elemList.forEach(function (element) {
+		if(! element.isDirectory)
+			req.user.files.push("./unzipped/"+element.name)
+	});
 }

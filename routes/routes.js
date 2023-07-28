@@ -121,12 +121,12 @@ router.patch("/dataset", auth.checkUser, function (req, res) { return __awaiter(
     });
 }); });
 var uploader = __importStar(require("../middleware/fileUploader.js"));
-router.post("/upload", auth.checkUser, uploader.checkFormat, uploader.unpackZip, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+router.post("/upload", auth.checkUser, uploader.checkFormat, uploader.unpackZip, uploader.bill, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         userCnt.upload(req, res, next);
         return [2 /*return*/];
     });
-}); }, uploader.bill, uploader.saveImgFS);
+}); });
 //-------------------- Python ------------------------------------------
 var pythonAdapter_1 = require("../middleware/pythonAdapter");
 var adapter = new pythonAdapter_1.PythonAdapter();

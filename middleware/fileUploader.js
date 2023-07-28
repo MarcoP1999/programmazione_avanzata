@@ -59,60 +59,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkFormat = exports.bill = exports.saveImgFS = exports.unpackZip = exports.upload = void 0;
+exports.unpackZip = exports.checkFormat = exports.bill = exports.saveImgFS = void 0;
 var userModel = __importStar(require("../model/Users.js"));
 var fs = require('fs');
 var path = require('path');
-var DecompressZip = require('decompress-zip');
-function upload(req, res, next) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            return [2 /*return*/];
-        });
-    });
-}
-exports.upload = upload;
-function unpackZip(req, res, next) {
-    return __awaiter(this, void 0, void 0, function () {
-        var unzipper_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (!(path.extname(req.user.file[0]) == ".zip")) return [3 /*break*/, 2];
-                    console.log("is a zip");
-                    unzipper_1 = new DecompressZip(req.user.file[0]);
-                    return [4 /*yield*/, fs.readFile(req.user.file[0], function (err, data) {
-                            console.log("unzipping");
-                            if (err)
-                                return res.status(400).send("Failed reading: " + req.user.file[0]);
-                            unzipper_1.extract({ path: "./unzipped/" });
-                        })];
-                case 1:
-                    _a.sent();
-                    unzipper_1.on('progress', function (fileIndex, fileCount) {
-                        console.log('Extracted file ' + (fileIndex + 1) + ' of ' + fileCount);
-                    });
-                    unzipper_1.on('extract', function (log) {
-                        console.log('log es', log);
-                        console.log('Extracted');
-                        return next();
-                    });
-                    return [2 /*return*/, next()];
-                case 2:
-                    next();
-                    _a.label = 3;
-                case 3: return [2 /*return*/];
-            }
-        });
-    });
-}
-exports.unpackZip = unpackZip;
-function saveImgFS(req, res, next) {
+var AdmZip = require("adm-zip");
+function saveImgFS(req, res, next, current) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             try {
-                fs.copyFile(req.user.file, req.FSpath, fs.constants.COPYFILE_EXCL, function () {
-                    console.log("File '" + req.user.file + " ' copied to application path: " + req.FSpath);
+                fs.copyFile(req.user.files[current], req.FSpath, fs.constants.COPYFILE_EXCL, function () {
+                    console.log("File '" + req.user.files[current] + " ' copied to application path: " + req.FSpath);
                     return next();
                 });
             }
@@ -132,12 +89,12 @@ function bill(req, res, next) {
                 case 0: return [4 /*yield*/, userModel.getBudget(req.user.email)];
                 case 1:
                     currentBudget = _a.sent();
-                    console.log("current budget" + currentBudget.dataValues.budget);
-                    console.log("n of files" + req.user.file.length);
-                    if (currentBudget.dataValues.budget >= 0.5 * req.user.file.length) {
+                    console.log("current budget: " + currentBudget.dataValues.budget);
+                    console.log("n of files: " + req.user.files.length);
+                    if (currentBudget.dataValues.budget >= 0.5 * req.user.files.length) {
                         req.currentBudget = currentBudget.dataValues.budget;
-                        req.budgetProposal = currentBudget.dataValues.budget - (0.5 * req.user.file.length);
-                        console.log("budget proposal" + req.budgetProposal);
+                        req.budgetProposal = currentBudget.dataValues.budget - (0.5 * req.user.files.length);
+                        console.log("budget proposal: " + req.budgetProposal);
                         next();
                     }
                     else {
@@ -153,7 +110,7 @@ exports.bill = bill;
 function checkFormat(req, res, next) {
     var accepted_extensions = [".jpg", ".jpeg", ".bmp", ".png", ".zip"];
     var accepted = true;
-    req.user.file.forEach(function (element) {
+    req.user.files.forEach(function (element) {
         console.log("Current file is " + element);
         if (!accepted_extensions.includes(path.extname(element)))
             accepted = false;
@@ -163,6 +120,38 @@ function checkFormat(req, res, next) {
         next();
     }
     else
-        res.status(400).send("Files unsupported" + req.user.file);
+        res.status(400).send("Files unsupported" + req.user.files);
 }
 exports.checkFormat = checkFormat;
+function unpackZip(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var zip, zipEntries;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (!(path.extname(req.user.files[0]) == ".zip")) return [3 /*break*/, 2];
+                    console.log("is a zip");
+                    zip = new AdmZip(req.user.files[0]);
+                    zipEntries = zip.getEntries();
+                    return [4 /*yield*/, zip.extractAllTo("./unzipped", true)];
+                case 1:
+                    _a.sent();
+                    updateFilesList(req, zipEntries);
+                    next();
+                    return [3 /*break*/, 3];
+                case 2:
+                    next();
+                    _a.label = 3;
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.unpackZip = unpackZip;
+function updateFilesList(req, elemList) {
+    req.user.files = []; //clear request file list => not a zip anymore
+    elemList.forEach(function (element) {
+        if (!element.isDirectory)
+            req.user.files.push("./unzipped/" + element.name);
+    });
+}

@@ -140,19 +140,19 @@ var UserController = /** @class */ (function () {
                         return [4 /*yield*/, datasetModel.getdatasetPK(req.user.dataset, req.user.email)];
                     case 1:
                         _a.datasetPK = _d.sent();
-                        if (!req.datasetPK)
+                        if (!res.locals.datasetPK)
                             res.status(404).send("Dataset '" + req.user.dataset + "' not found");
-                        count = 0;
+                        count = -1;
                         _c = (_b = req.user.files).forEach;
                         return [4 /*yield*/, function (current) {
-                                req.FSpath = "./images/" + uuid.randomUUID().toString() + ".jpg";
+                                res.locals.FSpath = "./images/" + uuid.randomUUID().toString() + ".jpg";
                                 uploader.saveImgFS(req, res, next, count++),
-                                    fileModel.saveImgDB(req.datasetPK, req.FSpath),
+                                    fileModel.saveImgDB(res.locals.datasetPK, res.locals.FSpath),
                                     req.user.currentBudget = userModel.updateBudget(req.budgetProposal, req.user.email);
                             }];
                     case 2:
                         _c.apply(_b, [_d.sent()]);
-                        res.status(200).send("File '" + req.user.files + " ' uploaded in: " + req.FSpath +
+                        res.status(200).send("File '" + req.user.files + " ' uploaded in: " + res.locals.FSpath +
                             "\nCurrent budget is: " + req.user.currentBudget);
                         return [2 /*return*/];
                 }

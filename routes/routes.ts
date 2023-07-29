@@ -69,7 +69,6 @@ router.patch("/dataset",
 );
 
 import * as uploader from "../middleware/fileUploader.js";
-
 router.post("/upload",
 	auth.checkUser,
 	uploader.checkFormat,
@@ -82,15 +81,62 @@ router.post("/upload",
 
 
 //-------------------- Python ------------------------------------------
-import { PythonAdapter } from "../middleware/pythonAdapter";
-let adapter = new PythonAdapter();
+import * as pythonAdapter from "../middleware/pythonAdapter";
 
- router.get("/py",
+router.get("/py",
 	auth.checkUser,
-	async (req, res) => {
-		adapter.read(req,res);
+	pythonAdapter.configModel,
+	async (req, res, next) => {
+		pythonAdapter.read(req,res);
 	}
 );
+
+router.get("/process",
+	auth.checkUser,
+	//pythonAdapter.configModel,
+	async (req, res) => {
+		res.locals.pid = "pid_" + Math.random().toString(36).slice(10);
+		await queue.add( res.locals.pid, 
+			pythonAdapter.segmentation(req, res)
+		);
+		res.status(200).send("Added: "+res.locals.pid +" to processing queue")
+	}
+);
+
+router.get("/status",
+	auth.checkUser,
+	//pythonAdapter.configModel,
+	async (req, res, next) => {
+		const job = await queue.add({
+			foo: 'bar'
+		  });
+	}
+);
+
+
+//-------------------- Queues ------------------------------------------
+//brew services start redis  //required for local usage of Bull
+const Queue = require('bull');
+const queue = new Queue('python');
+
+/*The process function will be called every time the worker 
+is idling and there are jobs to process in the queue*/
+queue.process(async (req,res) => {
+	return pythonAdapter.segmentation(req,res);
+});
+
+
+queue.on('progress', function(job, progress){
+	console.log( job.id+"is RUNNING" )
+})
+
+queue.on('error', function(job, progress){
+	console.log( job.id+"is RUNNING" )
+})
+
+queue.on('completed', (job, result) => {
+	console.log(`Job ${job.id} COMPLETED with result ${result}`);
+})
 
 
 //-------------------- Error Fallback --------------------------------------

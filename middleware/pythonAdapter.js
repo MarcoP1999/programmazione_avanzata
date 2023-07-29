@@ -36,29 +36,75 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PythonAdapter = void 0;
+exports.inference = exports.read = exports.configModel = void 0;
 var spawn = require('child_process').spawn;
 var returns = [];
-var PythonAdapter = /** @class */ (function () {
-    function PythonAdapter() {
-        var _this = this;
-        this.read = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-            var python;
-            return __generator(this, function (_a) {
-                python = spawn('python', ['./python/SAM_model.py', req.user.email]);
-                python.stdout.on('data', function (data) {
-                    // Do something with the data returned from python script
-                    returns.push(data.toString().split("\n"));
-                });
-                python.on('close', function (code) {
-                    console.log("Executed python script " + code);
-                    // send data to browser
-                    res.status(200).send(returns);
-                });
-                return [2 /*return*/];
+function configModel(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var process, _a, _b, _c;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
+                case 0: return [4 /*yield*/, spawn('python3', ['./python/SAM_model.py'])];
+                case 1:
+                    process = _d.sent();
+                    process.stdout.on('data', function (data) {
+                        // Do something with the data returned from python script
+                        returns.push(data.toString().split("\n"));
+                    });
+                    _b = (_a = process).on;
+                    _c = ['close'];
+                    return [4 /*yield*/, function (req, res, next) {
+                            //res.locals.configured = true;
+                            console.log("Model configured: " /*+res.locals.configured*/);
+                        }];
+                case 2: return [4 /*yield*/, _b.apply(_a, _c.concat([_d.sent()]))];
+                case 3:
+                    _d.sent();
+                    next();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.configModel = configModel;
+function read(req, res) {
+    return __awaiter(this, void 0, void 0, function () {
+        var python;
+        return __generator(this, function (_a) {
+            python = spawn('python3', ['./python/basic_test.py', req.user.email]);
+            python.stdout.on('data', function (data) {
+                // Do something with the data returned from python script
+                returns.push(data.toString().split("\n"));
             });
-        }); };
-    }
-    return PythonAdapter;
-}());
-exports.PythonAdapter = PythonAdapter;
+            python.on('close', function (code) {
+                console.log("Executed model configuration " + code);
+                // send data to browser
+                res.status(200).send(returns);
+            });
+            return [2 /*return*/];
+        });
+    });
+}
+exports.read = read;
+function inference(req, res) {
+    return __awaiter(this, void 0, void 0, function () {
+        var python;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, spawn('python3', ['./python/SAM_inference.py', req.user.files[0]])];
+                case 1:
+                    python = _a.sent();
+                    python.stdout.on('data', function (data) {
+                        // Do something with the data returned from python script
+                        returns.push(data.toString().split("\n"));
+                    });
+                    python.on('close', function (code) {
+                        console.log("Inference completed");
+                        res.status(200).send(returns);
+                    });
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.inference = inference;

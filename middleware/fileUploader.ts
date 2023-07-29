@@ -7,13 +7,13 @@ let AdmZip = require("adm-zip");
 
 export async function saveImgFS(req, res, next, current){
 	try{
-		fs.copyFile(req.user.files[current], req.FSpath, fs.constants.COPYFILE_EXCL, function () {
-			console.log("File '"+req.user.files[current]+" ' copied to application path: "+ req.FSpath);
+		fs.copyFile(req.user.files[current], res.locals.FSpath, fs.constants.COPYFILE_EXCL, function () {
+			console.log("File '"+req.user.files[current]+" ' copied to application path: "+ res.locals.FSpath);
 			return next();
 		});
 	}
 	catch(err){
-		res.status(404).send("File '"+req.FSpath+"' copy to FileSystem failed");
+		res.status(404).send("File '"+res.locals.FSpath+"' copy to FileSystem failed");
 	}
 } 
 

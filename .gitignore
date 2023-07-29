@@ -1,4 +1,6 @@
 node_modules
 images
+unzipped
 .env
 .DS_Store
+python/CHECKPOINT_sam_vit_b.pth

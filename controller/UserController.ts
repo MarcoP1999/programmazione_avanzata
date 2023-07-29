@@ -50,21 +50,21 @@ export class UserController{
 	public upload = async (req, res, next) => {
 		const uuid = require('crypto');
 
-		req.datasetPK = await datasetModel.getdatasetPK(req.user.dataset, req.user.email);
-		if(! req.datasetPK)
+		res.locals.datasetPK = await datasetModel.getdatasetPK(req.user.dataset, req.user.email);
+		if(! res.locals.datasetPK)
 			res.status(404).send("Dataset '"+req.user.dataset+"' not found");
 
 
-		let count = 0;
+		let count = -1;
 		req.user.files.forEach(await function(current) {
-			req.FSpath = "./images/" + uuid.randomUUID().toString() + ".jpg";
+			res.locals.FSpath = "./images/" + uuid.randomUUID().toString() + ".jpg";
 
 			uploader.saveImgFS(req, res, next, count++),
-			fileModel.saveImgDB(req.datasetPK, req.FSpath),
+			fileModel.saveImgDB(res.locals.datasetPK, res.locals.FSpath),
 			req.user.currentBudget = userModel.updateBudget(req.budgetProposal, req.user.email);
 		});
 
-		res.status(200).send("File '"+ req.user.files +" ' uploaded in: "+req.FSpath+
+		res.status(200).send("File '"+ req.user.files +" ' uploaded in: "+res.locals.FSpath+
 				"\nCurrent budget is: "+req.user.currentBudget);
 	}
 

@@ -128,11 +128,10 @@ router.post("/upload", auth.checkUser, uploader.checkFormat, uploader.unpackZip,
     });
 }); });
 //-------------------- Python ------------------------------------------
-var pythonAdapter_1 = require("../middleware/pythonAdapter");
-var adapter = new pythonAdapter_1.PythonAdapter();
-router.get("/py", auth.checkUser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+var pythonAdapter = __importStar(require("../middleware/pythonAdapter"));
+router.get("/py", auth.checkUser, pythonAdapter.configModel, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        adapter.read(req, res);
+        pythonAdapter.inference(req, res);
         return [2 /*return*/];
     });
 }); });

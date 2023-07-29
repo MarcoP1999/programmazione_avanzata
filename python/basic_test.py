@@ -1,5 +1,5 @@
 import sys 
 
-print("Pythonscript running")
+print("Python script running")
 print("Requested by: " + str(sys.argv[1]) )
 #sys.stdout.flush()

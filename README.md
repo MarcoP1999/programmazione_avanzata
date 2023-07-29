@@ -24,7 +24,31 @@ Si chiede di sviluppare il codice possibilmente utilizzando typescript.
 
 ## Progettazione
 
-### UML e diagrammi delle sequenze
+### UML
+
+### Diagrammi delle sequenze e funzionamento
+Foriremo in questa sezione una breve descrizione di ogni rotta e il diagramma di flusso ad essa associata.
+| Tipo | Rotta | 
+|--- |--- |
+| GET | /budget| 
+| GET | /dataset |
+| POST | /dataset |
+| PATCH | /dataset |
+| DEL | /dataset|
+| POST | /upload |
+| POST | /upload |
+| POST | /upload |
+| GET | /py |
+
+Seguendo l'ordine della tabella soprastante:
+è possibile verificare il credito di un utente
+vengono mostratii dataset dell'utente che li richiede
+viene rinominato un dataset
+viene cancellato un dataset
+viene caricata un'immagine
+viene caricato un file zip e poi spacchettato
+...
+
 
 ## Pattern usati
 
@@ -42,12 +66,6 @@ Nel nostro caso c'è anche l'integrazione di una parte di Routing, con delle rot
 ### Chain of responsability(Middleware)
 
 Con middleware viene inteso uno strato intermedio che si occupa di validare le richieste che in questo caso sono prese dalle rotte.Tutte le richieste della nostra applicazione sono passate al vaglio dei vari middleware, che verificano la validità del token associato alla richiesta e della coerenza dei dati inseriti, e la possibilità di realizzare determinate azioni.
-
-## Rotte e richieste API
-| Tipo | Rotta | Parametri |
-|--- |--- |--- |
-| row 1 | column 2 | column 3 |
-| row 2 | row 2 column 2 | row 2 column 3 |
 
 
 ## Metodo di utilizzo

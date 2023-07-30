@@ -43,9 +43,9 @@ Foriremo in questa sezione una breve descrizione di ogni rotta e il diagramma di
 
 Seguendo l'ordine della tabella soprastante:
 * è possibile verificare il credito di un utente
-  ![Diagramma di flusso per verificare il credito di un utente]()
+  ![Diagramma di flusso per verificare il credito di un utente](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/readBudget.png)
 * ricarica il credito di un utente
-  ![Diagramma di flusso per ricaricare il credito di un utente]()
+  ![Diagramma di flusso per ricaricare il credito di un utente](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/chargeBudget.png)
 * vengono mostrati i dataset dell'utente che li richiede
   ![Diagramma di flusso per mostrare i dateset di un utente o tutti i dataset in caso di utente admin](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141652.png)
 * viene rinominato un dataset

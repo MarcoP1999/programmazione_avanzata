@@ -3,6 +3,7 @@ import sys #reading .py input params
 import cv2
 #import glob
 import torch
+import json
 #import random
 #import requests
 #import numpy as np
@@ -12,35 +13,49 @@ import torch
 
 #from PIL import Image
 from segment_anything import SamPredictor
-from torch.utils.data import Dataset, DataLoader
 from segment_anything import sam_model_registry
 from segment_anything import SamAutomaticMaskGenerator
 
-def getArea(masks, images):
+
+def measureAreas(masks):
 	#print("Segmented obj:" + str(len(masks))+"\n\n")
-	segmentedArea = 0
+	totalArea = 0
+	areas = []
 	for i in range(len(masks)):
-		segmentedArea += masks[i].get('area')
+		totalArea += masks[i].get('area')
 	for i in range(len(masks)):
-		print("Segmented item "+str(i)+ " is " + str( round(masks[i].get('area')/segmentedArea*100, 1)) +"% of total area")
-	#stringify to JSON
+		areas.append( round(masks[i].get('area')/totalArea*100, 1) )
+		#print("Segmented item "+str(i)+ " is " + str( round(masks[i].get('area')/totalArea*100, 1)) +"% of total area")
+	return areas
+
+def getTotalArea(masks):
+	totalArea = 0
+	for i in range(len(masks)):
+		totalArea += masks[i].get('area')
+	return totalArea
+
+
 
 #--------------------------------------------------------------------------
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu");
-print(f"Using device: {device}");
+#print(f"Using device: {device}");
 
-model_type = "vit_b" #saved backbone
+model_type = "vit_b" #backbone we choose (lightest)
 sam = sam_model_registry[model_type](checkpoint="./python/CHECKPOINT_sam_vit_b.pth")
 sam.to(device=device)
 mask_generator1 = SamAutomaticMaskGenerator(sam, points_per_batch=16)
 predictor = SamPredictor(sam)
 
 
-image_path = str(sys.argv[1])
-maskList = []
-for images in range(len(sys.argv[1])):
-	image_information = cv2.imread(image_path)
-	image = cv2.resize(image_information, (224,224))
-	maskList.append(mask_generator1.generate(image))
-	print(getArea(maskList, image_path))
+objList = []
+for current in sys.argv[1].split(","):
+	image = cv2.resize( cv2.imread(current), (224,224) )
+	imageMask = mask_generator1.generate(image)
 
+	maskObj = {
+		"objects" : len(imageMask),
+		"totalarea": getTotalArea(imageMask),
+		"segmentedArea": measureAreas(imageMask)
+	}
+	objList.append( json.dumps(maskObj) )
+print("{ \"segmented\": " + (str(objList)).replace("'", "") + "}")

@@ -108,8 +108,9 @@ import * as pythonAdapter from "../middleware/pythonAdapter";
 router.get("/py",
 	auth.checkUser,
 	//pythonAdapter.configModel,
+	userCnt.getDBfiles,
 	async (req, res, next) => {
-		await pythonAdapter.segmentation(req, res);
+		await pythonAdapter.segmentation(req, res, next);
 	}
 );
 
@@ -130,10 +131,10 @@ router.get("/status",
 	//pythonAdapter.configModel,
 		/*The process function will be called every time the worker 
 		is idling and there are jobs to process in the queue*/
-	async (req, res) => {
+	async (req, res, next) => {
 		queue.process(
 			async (job) => {
-				return pythonAdapter.segmentation(req, res);
+				return pythonAdapter.segmentation(req, res, next);
 			}
 		)
 	}

@@ -167,7 +167,7 @@ var UserController = /** @class */ (function () {
                 }
             });
         }); };
-        this.getFiles = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+        this.getDBfiles = function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
             var datasetPK, datasetElems;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -182,8 +182,7 @@ var UserController = /** @class */ (function () {
                         datasetElems.forEach(function (element) {
                             req.user.files.push(element.dataValues.filepath);
                         });
-                        console.log(req.user.files);
-                        res.status(200).send("Read console");
+                        next();
                         return [2 /*return*/];
                 }
             });

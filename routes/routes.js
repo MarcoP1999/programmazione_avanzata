@@ -154,10 +154,10 @@ queue.on('global:completed', function (jobId, result) {
 var pythonAdapter = __importStar(require("../middleware/pythonAdapter"));
 router.get("/py", auth.checkUser, 
 //pythonAdapter.configModel,
-function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+userCnt.getDBfiles, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, pythonAdapter.segmentation(req, res)];
+            case 0: return [4 /*yield*/, pythonAdapter.segmentation(req, res, next)];
             case 1:
                 _a.sent();
                 return [2 /*return*/];
@@ -166,12 +166,13 @@ function (req, res, next) { return __awaiter(void 0, void 0, void 0, function ()
 }); });
 router.get("/process", auth.checkUser, 
 //pythonAdapter.configModel,
-function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var job;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                res.locals.pid = "pid_" + Math.random().toString(36).slice(10);
+                userCnt.getDBfiles(req, res, next),
+                    res.locals.pid = "pid_" + Math.random().toString(36).slice(10);
                 return [4 /*yield*/, queue.add(res.locals.pid, {})];
             case 1:
                 job = _a.sent();
@@ -184,19 +185,13 @@ router.get("/status", auth.checkUser,
 //pythonAdapter.configModel,
 /*The process function will be called every time the worker
 is idling and there are jobs to process in the queue*/
-function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         queue.process(function (job) { return __awaiter(void 0, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, pythonAdapter.segmentation(req, res)];
+                return [2 /*return*/, pythonAdapter.segmentation(req, res, next)];
             });
         }); });
-        return [2 /*return*/];
-    });
-}); });
-router.get("/files", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        userCnt.getFiles(req, res);
         return [2 /*return*/];
     });
 }); });

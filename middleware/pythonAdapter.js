@@ -38,7 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.segmentation = exports.read = exports.configModel = void 0;
 var spawn = require('child_process').spawn;
-var pyOutput = [];
+var pyOutput = String();
 function configModel(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var process, _a, _b, _c;
@@ -49,7 +49,7 @@ function configModel(req, res, next) {
                     process = _d.sent();
                     process.stdout.on('data', function (data) {
                         // Do something with the data returned from python script
-                        pyOutput.push(data.toString().split("\n"));
+                        pyOutput += data.toString().split("\n");
                     });
                     _b = (_a = process).on;
                     _c = ['close'];
@@ -74,7 +74,7 @@ function read(req, res) {
             python = spawn('python3', ['./python/basic_test.py', req.user.email]);
             python.stdout.on('data', function (data) {
                 // Do something with the data returned from python script
-                pyOutput.push(data.toString().split("\n"));
+                pyOutput += data.toString().split("\n");
             });
             python.on('close', function (code) {
                 console.log("Executed model configuration " + code);
@@ -87,21 +87,21 @@ function read(req, res) {
     });
 }
 exports.read = read;
-function segmentation(req, res) {
+function segmentation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var process;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, spawn('python3', ['./python/SAM_inference.py', req.user.files[0]])];
+                case 0: return [4 /*yield*/, spawn('python3', ['./python/SAM_inference.py', req.user.files])];
                 case 1:
                     process = _a.sent();
                     process.stdout.on('data', function (data) {
                         // Do something with the data returned from python script
-                        pyOutput.push(data.toString().split("\n"));
+                        pyOutput = data.toString();
                     });
                     process.on('close', function (code) {
                         console.log("Inference completed");
-                        res.status(200).send(pyOutput);
+                        res.status(200).json(JSON.parse(pyOutput));
                     });
                     return [2 /*return*/];
             }

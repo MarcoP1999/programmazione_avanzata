@@ -96,7 +96,7 @@ function verifyAndAuthenticate(req, res, next) {
         var decoded = jwt.verify(req.token, process.env.SECRET_KEY);
         if (decoded !== null) {
             req.user = decoded;
-            console.log("Answered to Authenticated Client");
+            console.log("Accepted authenticated client Request");
             next();
         }
         else {

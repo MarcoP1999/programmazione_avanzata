@@ -1,5 +1,7 @@
+import { json } from "sequelize";
+
 const {spawn} = require('child_process');
-let pyOutput = [];
+let pyOutput = String();
 
 export async function configModel(req, res, next){
 		//if(! res.locals.configured){
@@ -7,7 +9,7 @@ export async function configModel(req, res, next){
 
 			process.stdout.on('data', (data) => {
 				// Do something with the data returned from python script
-				pyOutput.push(data.toString().split("\n"));
+				pyOutput += data.toString().split("\n");
 			});
 
 			await process.on('close', await function(req, res, next){
@@ -24,7 +26,7 @@ export async function read(req, res){
 		
 		python.stdout.on('data', (data) => {
 			// Do something with the data returned from python script
-			pyOutput.push(data.toString().split("\n"));
+			pyOutput += data.toString().split("\n");
 		});
 		
 		python.on('close', (code) => {
@@ -36,17 +38,17 @@ export async function read(req, res){
 }
 
 
-export async function segmentation(req, res){
+export async function segmentation(req, res, next){
 	// spawn new child process to call the python script
-	const process = await spawn('python3', ['./python/SAM_inference.py', req.user.files[0] ] );
+	const process = await spawn('python3', ['./python/SAM_inference.py', req.user.files ] );
 	
 	process.stdout.on('data', (data) => {
 		// Do something with the data returned from python script
-		pyOutput.push(data.toString().split("\n"));
+		pyOutput = data.toString()
 	});
 	   
 	process.on('close', (code) => {
 		console.log("Inference completed");
-		res.status(200).send(pyOutput);
+		res.status(200).json( JSON.parse( pyOutput ) );
 	});
 }

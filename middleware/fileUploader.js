@@ -64,18 +64,18 @@ var userModel = __importStar(require("../model/Users.js"));
 var fs = require('fs');
 var path = require('path');
 var AdmZip = require("adm-zip");
-function saveImgFS(req, res, next, current) {
+function saveImgFS(req, res, next, currentFile) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            try {
-                fs.copyFile(req.user.files[current], res.locals.FSpath, fs.constants.COPYFILE_EXCL, function () {
-                    console.log("File '" + req.user.files[current] + " ' copied to application path: " + res.locals.FSpath);
-                    return next();
-                });
-            }
-            catch (err) {
-                res.status(404).send("File '" + res.locals.FSpath + "' copy to FileSystem failed");
-            }
+            if (fs.copyFile(currentFile, res.locals.FSpath, fs.constants.COPYFILE_EXCL, function (err) {
+                if (err) {
+                    console.log("File '" + res.locals.FSpath + "' copy to FileSystem failed");
+                    return false;
+                }
+                else
+                    return true;
+            }))
+                return [2 /*return*/, true];
             return [2 /*return*/];
         });
     });
@@ -111,7 +111,6 @@ function checkFormat(req, res, next) {
     var accepted_extensions = [".jpg", ".jpeg", ".bmp", ".png", ".zip"];
     var accepted = true;
     req.user.files.forEach(function (element) {
-        console.log("Current file is " + element);
         if (!accepted_extensions.includes(path.extname(element)))
             accepted = false;
     });

@@ -58,24 +58,18 @@ export async function getDatasets(role: Number, owner: string ) {
 	}
 }
 
-export async function getdatasetPK(dsName: string, owner: string ) {
+export async function getdatasetPK(dsName, owner ) {
 	
 	try{
-		let datasets:any = await Dataset.findOne(
-								{
-									attributes: ['dataset_id'],
-									where: 
-									{ 
-										fk_user: owner,
-										name: dsName
-									}
-								});
+		let datasets = await Dataset.findOne({ 
+			where: { fk_user: owner, name: dsName } 
+		})
 		return datasets.dataValues.dataset_id;
 	}
 	catch (err)	{
 		console.log(err);
+		return false;
 	}
-	return 0;
 }
 
 export async function deleteDataset(which: string ) {

@@ -123,15 +123,80 @@ router.patch("/dataset", auth.checkUser, function (req, res) { return __awaiter(
 var uploader = __importStar(require("../middleware/fileUploader.js"));
 router.post("/upload", auth.checkUser, uploader.checkFormat, uploader.unpackZip, uploader.bill, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        userCnt.upload(req, res, next);
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, userCnt.upload(req, res, next)];
+            case 1:
+                _a.sent();
+                return [2 /*return*/];
+        }
+    });
+}); });
+//-------------------- Queues ------------------------------------------
+//brew services start redis  //required for local usage of Bull
+var Queue = require('bull');
+var queue = new Queue('python');
+queue.on('progress', function (job, progress) {
+    console.log(job.id + "is RUNNING");
+});
+queue.on('error', function (job, progress) {
+    console.log(job.id + " ERROR");
+});
+queue.on('global:completed', function (jobId, result) {
+    console.log("Job ".concat(jobId, " COMPLETED with result ").concat(result));
+    (function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            res.status(200).send("Job ".concat(jobId, " COMPLETED with result ").concat(result));
+            return [2 /*return*/];
+        });
+    }); });
+});
+//-------------------- Python ------------------------------------------
+var pythonAdapter = __importStar(require("../middleware/pythonAdapter"));
+router.get("/py", auth.checkUser, 
+//pythonAdapter.configModel,
+function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, pythonAdapter.segmentation(req, res)];
+            case 1:
+                _a.sent();
+                return [2 /*return*/];
+        }
+    });
+}); });
+router.get("/process", auth.checkUser, 
+//pythonAdapter.configModel,
+function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var job;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                res.locals.pid = "pid_" + Math.random().toString(36).slice(10);
+                return [4 /*yield*/, queue.add(res.locals.pid, {})];
+            case 1:
+                job = _a.sent();
+                res.status(200).send("Added: " + res.locals.pid + " to processing queue");
+                return [2 /*return*/];
+        }
+    });
+}); });
+router.get("/status", auth.checkUser, 
+//pythonAdapter.configModel,
+/*The process function will be called every time the worker
+is idling and there are jobs to process in the queue*/
+function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        queue.process(function (job) { return __awaiter(void 0, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, pythonAdapter.segmentation(req, res)];
+            });
+        }); });
         return [2 /*return*/];
     });
 }); });
-//-------------------- Python ------------------------------------------
-var pythonAdapter = __importStar(require("../middleware/pythonAdapter"));
-router.get("/py", auth.checkUser, pythonAdapter.configModel, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+router.get("/files", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        pythonAdapter.inference(req, res);
+        userCnt.getFiles(req, res);
         return [2 /*return*/];
     });
 }); });

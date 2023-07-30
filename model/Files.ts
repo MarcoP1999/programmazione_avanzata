@@ -17,7 +17,7 @@ const Files = sequelize.define(
 			allowNull: false
 		},
 		filepath: {
-			type: DataTypes.TEXT,
+			type: DataTypes.STRING(250),
 			allowNull: false,
 		}
 	},
@@ -30,13 +30,28 @@ const Files = sequelize.define(
 
 export async function saveImgDB(dataset_id, elementPath) {
 	try{
-		return await Files.create({
+		let newfile = await Files.create({
 			fk_dataset: dataset_id,
 			filepath: elementPath
 		});
+		if(newfile)
+			return true;
+	}
+	catch (err)	{
+		console.log(err);
+		return false;
+	}
+}
+
+export async function readFiles(dataset_id){
+	try{
+		let files = await Files.findAll({
+			attributes: ['filepath'],
+			where: { fk_dataset: dataset_id }
+		});
+		return files;
 	}
 	catch (err)	{
 		console.log(err);
 	}
-	return false;
 }

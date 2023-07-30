@@ -55,8 +55,9 @@ export async function checkUser(email: string) {
    * @param email l'email dell'utente
    */
 export async function updateBudget(newBudget: Number, usermail: string) {
-	return await Users.update(
+	const newUser = await Users.update(
 			{	budget: newBudget	},
 			{	where: { email: usermail}	}
 	);
+	return newUser;
 }

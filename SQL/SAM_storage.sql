@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS public."Files"
 (
     file_id SERIAL PRIMARY KEY,
     fk_dataset SERIAL NOT NULL,
-    filepath text
+    filepath varchar(250)
 );
 
 

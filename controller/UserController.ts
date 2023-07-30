@@ -2,6 +2,7 @@ import * as userModel from "../model/Users.js";
 import * as datasetModel from "../model/Datasets.js";
 import * as uploader from "../middleware/fileUploader.js";
 import * as fileModel from "../model/Files.js";
+import { INTEGER } from "sequelize";
 
 export class UserController{
 
@@ -54,18 +55,34 @@ export class UserController{
 		if(! res.locals.datasetPK)
 			res.status(404).send("Dataset '"+req.user.dataset+"' not found");
 
-
-		let count = -1;
-		req.user.files.forEach(await function(current) {
+		let processOK = true;
+		req.user.files.forEach( function(currentFile){
 			res.locals.FSpath = "./images/" + uuid.randomUUID().toString() + ".jpg";
 
-			uploader.saveImgFS(req, res, next, count++),
-			fileModel.saveImgDB(res.locals.datasetPK, res.locals.FSpath),
-			req.user.currentBudget = userModel.updateBudget(req.budgetProposal, req.user.email);
+			if(fileModel.saveImgDB(res.locals.datasetPK, res.locals.FSpath) && uploader.saveImgFS(req, res, next, currentFile) ){
+				console.log("File " + res.locals.FSpath + " saved to DB");
+			}
+			else processOK = false;
 		});
 
-		res.status(200).send("File '"+ req.user.files +" ' uploaded in: "+res.locals.FSpath+
-				"\nCurrent budget is: "+req.user.currentBudget);
+		if(processOK){
+			userModel.updateBudget(req.budgetProposal, req.user.email);
+			res.status(200).send("Files ["+ req.user.files +"] upload complete!"+
+				"\nCurrent budget is: "+ (await userModel.getBudget(req.user.email)).dataValues.budget );
+		}
+		else 
+			res.status(400).send("Error uploading images");
 	}
 
+
+	public getDBfiles =  async (req, res, next) => {
+		req.user.files = [] //clears file list
+		let datasetPK = await datasetModel.getdatasetPK(req.user.dataset, req.user.email);
+
+		let datasetElems = await fileModel.readFiles(datasetPK);
+		datasetElems.forEach(element => {
+			req.user.files.push(element.dataValues.filepath)
+		});
+		next();
+	}
 }

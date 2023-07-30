@@ -106,10 +106,13 @@ exports.checkUser = checkUser;
  */
 function updateBudget(newBudget, usermail) {
     return __awaiter(this, void 0, void 0, function () {
+        var newUser;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, Users.update({ budget: newBudget }, { where: { email: usermail } })];
-                case 1: return [2 /*return*/, _a.sent()];
+                case 1:
+                    newUser = _a.sent();
+                    return [2 /*return*/, newUser];
             }
         });
     });

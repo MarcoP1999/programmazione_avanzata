@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveImgDB = void 0;
+exports.readFiles = exports.saveImgDB = void 0;
 var sequelize_1 = require("sequelize");
 var Database_1 = require("../model/Database");
 var sequelize = Database_1.SingletonDB.getInstance().getConnection();
@@ -52,7 +52,7 @@ var Files = sequelize.define("Files", {
         allowNull: false
     },
     filepath: {
-        type: sequelize_1.DataTypes.TEXT,
+        type: sequelize_1.DataTypes.STRING(250),
         allowNull: false,
     }
 }, {
@@ -62,7 +62,7 @@ var Files = sequelize.define("Files", {
 });
 function saveImgDB(dataset_id, elementPath) {
     return __awaiter(this, void 0, void 0, function () {
-        var err_1;
+        var newfile, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -71,14 +71,42 @@ function saveImgDB(dataset_id, elementPath) {
                             fk_dataset: dataset_id,
                             filepath: elementPath
                         })];
-                case 1: return [2 /*return*/, _a.sent()];
+                case 1:
+                    newfile = _a.sent();
+                    if (newfile)
+                        return [2 /*return*/, true];
+                    return [3 /*break*/, 3];
                 case 2:
                     err_1 = _a.sent();
                     console.log(err_1);
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/, false];
+                    return [2 /*return*/, false];
+                case 3: return [2 /*return*/];
             }
         });
     });
 }
 exports.saveImgDB = saveImgDB;
+function readFiles(dataset_id) {
+    return __awaiter(this, void 0, void 0, function () {
+        var files, err_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, Files.findAll({
+                            attributes: ['filepath'],
+                            where: { fk_dataset: dataset_id }
+                        })];
+                case 1:
+                    files = _a.sent();
+                    return [2 /*return*/, files];
+                case 2:
+                    err_2 = _a.sent();
+                    console.log(err_2);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.readFiles = readFiles;

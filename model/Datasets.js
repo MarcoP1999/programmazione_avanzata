@@ -123,11 +123,7 @@ function getdatasetPK(dsName, owner) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     return [4 /*yield*/, Dataset.findOne({
-                            attributes: ['dataset_id'],
-                            where: {
-                                fk_user: owner,
-                                name: dsName
-                            }
+                            where: { fk_user: owner, name: dsName }
                         })];
                 case 1:
                     datasets = _a.sent();
@@ -135,8 +131,8 @@ function getdatasetPK(dsName, owner) {
                 case 2:
                     err_3 = _a.sent();
                     console.log(err_3);
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/, 0];
+                    return [2 /*return*/, false];
+                case 3: return [2 /*return*/];
             }
         });
     });

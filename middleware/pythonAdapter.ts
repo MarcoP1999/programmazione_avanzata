@@ -30,6 +30,7 @@ export async function read(req, res){
 		python.on('close', (code) => {
 			console.log("Executed model configuration " + code);
 			// send data to browser
+			//res.locals.answer = pyOutput;
 			res.status(200).send(pyOutput);
 		});
 }
@@ -46,6 +47,6 @@ export async function segmentation(req, res){
 	   
 	process.on('close', (code) => {
 		console.log("Inference completed");
-		//res.status(200).send(pyOutput);
+		res.status(200).send(pyOutput);
 	});
 }

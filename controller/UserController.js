@@ -131,29 +131,59 @@ var UserController = /** @class */ (function () {
             });
         }); };
         this.upload = function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
-            var uuid, _a, count, _b, _c;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
+            var uuid, _a, processOK, _b, _c, _d;
+            return __generator(this, function (_e) {
+                switch (_e.label) {
                     case 0:
                         uuid = require('crypto');
-                        _a = req;
+                        _a = res.locals;
                         return [4 /*yield*/, datasetModel.getdatasetPK(req.user.dataset, req.user.email)];
                     case 1:
-                        _a.datasetPK = _d.sent();
+                        _a.datasetPK = _e.sent();
                         if (!res.locals.datasetPK)
                             res.status(404).send("Dataset '" + req.user.dataset + "' not found");
-                        count = -1;
-                        _c = (_b = req.user.files).forEach;
-                        return [4 /*yield*/, function (current) {
-                                res.locals.FSpath = "./images/" + uuid.randomUUID().toString() + ".jpg";
-                                uploader.saveImgFS(req, res, next, count++),
-                                    fileModel.saveImgDB(res.locals.datasetPK, res.locals.FSpath),
-                                    req.user.currentBudget = userModel.updateBudget(req.budgetProposal, req.user.email);
-                            }];
+                        processOK = true;
+                        req.user.files.forEach(function (currentFile) {
+                            res.locals.FSpath = "./images/" + uuid.randomUUID().toString() + ".jpg";
+                            if (fileModel.saveImgDB(res.locals.datasetPK, res.locals.FSpath) && uploader.saveImgFS(req, res, next, currentFile)) {
+                                console.log("File " + res.locals.FSpath + " saved to DB");
+                            }
+                            else
+                                processOK = false;
+                        });
+                        if (!processOK) return [3 /*break*/, 3];
+                        userModel.updateBudget(req.budgetProposal, req.user.email);
+                        _c = (_b = res.status(200)).send;
+                        _d = "Files [" + req.user.files + "] upload complete!" +
+                            "\nCurrent budget is: ";
+                        return [4 /*yield*/, userModel.getBudget(req.user.email)];
                     case 2:
-                        _c.apply(_b, [_d.sent()]);
-                        res.status(200).send("File '" + req.user.files + " ' uploaded in: " + res.locals.FSpath +
-                            "\nCurrent budget is: " + req.user.currentBudget);
+                        _c.apply(_b, [_d + (_e.sent()).dataValues.budget]);
+                        return [3 /*break*/, 4];
+                    case 3:
+                        res.status(400).send("Error uploading images");
+                        _e.label = 4;
+                    case 4: return [2 /*return*/];
+                }
+            });
+        }); };
+        this.getFiles = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+            var datasetPK, datasetElems;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        req.user.files = []; //clears file list
+                        return [4 /*yield*/, datasetModel.getdatasetPK(req.user.dataset, req.user.email)];
+                    case 1:
+                        datasetPK = _a.sent();
+                        return [4 /*yield*/, fileModel.readFiles(datasetPK)];
+                    case 2:
+                        datasetElems = _a.sent();
+                        datasetElems.forEach(function (element) {
+                            req.user.files.push(element.dataValues.filepath);
+                        });
+                        console.log(req.user.files);
+                        res.status(200).send("Read console");
                         return [2 /*return*/];
                 }
             });

@@ -5,16 +5,15 @@ let fs = require('fs');
 let path = require('path')
 let AdmZip = require("adm-zip");
 
-export async function saveImgFS(req, res, next, current){
-	try{
-		fs.copyFile(req.user.files[current], res.locals.FSpath, fs.constants.COPYFILE_EXCL, function () {
-			console.log("File '"+req.user.files[current]+" ' copied to application path: "+ res.locals.FSpath);
-			return next();
-		});
-	}
-	catch(err){
-		res.status(404).send("File '"+res.locals.FSpath+"' copy to FileSystem failed");
-	}
+export async function saveImgFS(req, res, next, currentFile){
+	if( fs.copyFile(currentFile, res.locals.FSpath, fs.constants.COPYFILE_EXCL, (err) => {
+			if (err){
+				console.log("File '"+res.locals.FSpath+"' copy to FileSystem failed");
+				return false;
+			}
+			else return true;
+		})
+	) return true;
 } 
 
 
@@ -40,7 +39,6 @@ export function checkFormat(req, res, next) {
 	let accepted = true;
 	req.user.files.forEach( 
 			function(element){
-				console.log("Current file is "+ element)
 				if(! accepted_extensions.includes( path.extname(element) ) )
 					accepted = false;
 			}

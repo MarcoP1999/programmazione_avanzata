@@ -25,7 +25,7 @@ Si chiede di sviluppare il codice possibilmente utilizzando typescript.
 ## Progettazione
 
 ### UML
-
+![UML con le rotte da definire](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Use_Case.png)
 ### Diagrammi delle sequenze e funzionamento
 Foriremo in questa sezione una breve descrizione di ogni rotta e il diagramma di flusso ad essa associata.
 | Tipo | Rotta | 

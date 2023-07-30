@@ -18,19 +18,20 @@ Sono state predisposte le seguenti rotte:
 * Creare una rotta che consenta di valutare lo stato di avanzamento del processamento distinguendo le fasi. Ad esempio, PENDING (in coda), RUNNING (in fase di inferenza), FAILED (in caso di errore riportando anche la tipologia di errore), ABORTED (credito non sufficiente), COMPLETED (processamento data-set completo).
 * In caso di COMPLETED ritornare anche il risultato dell’inferenza sotto forma di JSON espresso come per ogni immagine il numero di oggetti segmentati e per ciascuno l’area espressa sotto forma di percentuale rispetto all’area totale;
 * Creare una rotta che consenta dato l’id del processamento, se COMPLETED, di scaricare una immagine o uno zip che contiene il risultato dell’inferenza (maschera di segmentazione).
-L’inferenza deve avvenire mediante una gestione delle code con Bull o Celery che consenta di interfacciare il codice già disponibile per effettuare l’inferenza (codice python).
+L’inferenza deve avvenire mediante una gestione delle code con Bull che consenta di interfacciare il codice già disponibile per effettuare l’inferenza (codice python).
 * Restituire il credito residuo di un utente (necessaria autenticazione mediante token JWT)
 Si chiede di sviluppare il codice possibilmente utilizzando typescript.
 
 ## Progettazione
 
 ### UML
-
+![UML con le rotte da definire](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Use_Case.png)
 ### Diagrammi delle sequenze e funzionamento
 Foriremo in questa sezione una breve descrizione di ogni rotta e il diagramma di flusso ad essa associata.
 | Tipo | Rotta | 
 |--- |--- |
-| GET | /budget| 
+| GET | /budget | 
+| PATCH | /budget |
 | GET | /dataset |
 | POST | /dataset |
 | PATCH | /dataset |
@@ -41,14 +42,22 @@ Foriremo in questa sezione una breve descrizione di ogni rotta e il diagramma di
 | GET | /py |
 
 Seguendo l'ordine della tabella soprastante:
-è possibile verificare il credito di un utente
-vengono mostratii dataset dell'utente che li richiede
-viene rinominato un dataset
-viene cancellato un dataset
-viene caricata un'immagine
-viene caricato un file zip e poi spacchettato
+* è possibile verificare il credito di un utente
+  ![Diagramma di flusso per verificare il credito di un utente](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/readBudget.png)
+* ricarica il credito di un utente
+  ![Diagramma di flusso per ricaricare il credito di un utente](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/chargeBudget.png)
+* vengono mostrati i dataset dell'utente che li richiede
+  ![Diagramma di flusso per mostrare i dateset di un utente o tutti i dataset in caso di utente admin](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141652.png)
+* viene rinominato un dataset
+  ![Diagramma di flusso per rinominare un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141733.png)
+* viene cancellato un dataset
+  ![Diagramma di flusso per cancellare un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141733.png)
+* viene caricata un'immagine
+  ![Diagramma di flusso per caricare un'immagine in un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/insertImage.png)
+* viene caricato un file zip e poi spacchettato
+  ![Diagramma di flusso per caricare un file zip che verrà poi spacchettato in un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/insertZIP.png)
 ...
-
+Per far funzionare queste rotte bisogna genereare un token JWT con gli adeguati parametri e con le credenziali di un utente autenticato(admin e non) e poi passarlo a Postman che risponderà alla richiesta.
 
 ## Pattern usati
 
@@ -78,9 +87,10 @@ Per testare il progetto, è necessario seguire questi passaggi:
 5. Avviare Docker e assicurarsi che i servizi necessari per il progetto siano in esecuzione.
 6. Utilizzare Postman per inviare le chiamate al server e verificare le risposte.
 Lanciare quindi i seguenti comandi nella giusta directory:
-
+```javascript
 'docker compose build'
 'docker compose up'
+```
 ## Software utilizzati
 * [Express.js](https://expressjs.com/it/)
 * [Postgres](https://www.postgresql.org/)

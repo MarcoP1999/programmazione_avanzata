@@ -48,7 +48,7 @@ Seguendo l'ordine della tabella soprastante:
 * viene caricata un'immagine
 * viene caricato un file zip e poi spacchettato
 ...
-
+Per far funzionare queste rotte bisogna genereare un token JWT con gli adeguati parametri e con le credenziali di un utente autenticato(admin e non) e poi passarlo a Postman che risponderà alla richiesta.
 
 ## Pattern usati
 
@@ -78,9 +78,10 @@ Per testare il progetto, è necessario seguire questi passaggi:
 5. Avviare Docker e assicurarsi che i servizi necessari per il progetto siano in esecuzione.
 6. Utilizzare Postman per inviare le chiamate al server e verificare le risposte.
 Lanciare quindi i seguenti comandi nella giusta directory:
-
+```javascript
 'docker compose build'
 'docker compose up'
+```
 ## Software utilizzati
 * [Express.js](https://expressjs.com/it/)
 * [Postgres](https://www.postgresql.org/)

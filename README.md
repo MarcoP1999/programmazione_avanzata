@@ -30,7 +30,8 @@ Si chiede di sviluppare il codice possibilmente utilizzando typescript.
 Foriremo in questa sezione una breve descrizione di ogni rotta e il diagramma di flusso ad essa associata.
 | Tipo | Rotta | 
 |--- |--- |
-| GET | /budget| 
+| GET | /budget | 
+| PATCH | /budget |
 | GET | /dataset |
 | POST | /dataset |
 | PATCH | /dataset |
@@ -42,11 +43,19 @@ Foriremo in questa sezione una breve descrizione di ogni rotta e il diagramma di
 
 Seguendo l'ordine della tabella soprastante:
 * è possibile verificare il credito di un utente
-* vengono mostratii dataset dell'utente che li richiede
+  ![Diagramma di flusso per verificare il credito di un utente]()
+* ricarica il credito di un utente
+  ![Diagramma di flusso per ricaricare il credito di un utente]()
+* vengono mostrati i dataset dell'utente che li richiede
+  ![Diagramma di flusso per mostrare i dateset di un utente o tutti i dataset in caso di utente admin](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141652.png)
 * viene rinominato un dataset
+  ![Diagramma di flusso per rinominare un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141733.png)
 * viene cancellato un dataset
+  ![Diagramma di flusso per cancellare un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141733.png)
 * viene caricata un'immagine
+  ![Diagramma di flusso per caricare un'immagine in un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141826.png)
 * viene caricato un file zip e poi spacchettato
+  ![Diagramma di flusso per caricare un file zip che verrà poi spacchettato in un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20142033.png)
 ...
 Per far funzionare queste rotte bisogna genereare un token JWT con gli adeguati parametri e con le credenziali di un utente autenticato(admin e non) e poi passarlo a Postman che risponderà alla richiesta.
 

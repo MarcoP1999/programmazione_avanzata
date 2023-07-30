@@ -18,7 +18,7 @@ Sono state predisposte le seguenti rotte:
 * Creare una rotta che consenta di valutare lo stato di avanzamento del processamento distinguendo le fasi. Ad esempio, PENDING (in coda), RUNNING (in fase di inferenza), FAILED (in caso di errore riportando anche la tipologia di errore), ABORTED (credito non sufficiente), COMPLETED (processamento data-set completo).
 * In caso di COMPLETED ritornare anche il risultato dell’inferenza sotto forma di JSON espresso come per ogni immagine il numero di oggetti segmentati e per ciascuno l’area espressa sotto forma di percentuale rispetto all’area totale;
 * Creare una rotta che consenta dato l’id del processamento, se COMPLETED, di scaricare una immagine o uno zip che contiene il risultato dell’inferenza (maschera di segmentazione).
-L’inferenza deve avvenire mediante una gestione delle code con Bull o Celery che consenta di interfacciare il codice già disponibile per effettuare l’inferenza (codice python).
+L’inferenza deve avvenire mediante una gestione delle code con Bull che consenta di interfacciare il codice già disponibile per effettuare l’inferenza (codice python).
 * Restituire il credito residuo di un utente (necessaria autenticazione mediante token JWT)
 Si chiede di sviluppare il codice possibilmente utilizzando typescript.
 
@@ -41,12 +41,12 @@ Foriremo in questa sezione una breve descrizione di ogni rotta e il diagramma di
 | GET | /py |
 
 Seguendo l'ordine della tabella soprastante:
-è possibile verificare il credito di un utente
-vengono mostratii dataset dell'utente che li richiede
-viene rinominato un dataset
-viene cancellato un dataset
-viene caricata un'immagine
-viene caricato un file zip e poi spacchettato
+* è possibile verificare il credito di un utente
+* vengono mostratii dataset dell'utente che li richiede
+* viene rinominato un dataset
+* viene cancellato un dataset
+* viene caricata un'immagine
+* viene caricato un file zip e poi spacchettato
 ...
 
 

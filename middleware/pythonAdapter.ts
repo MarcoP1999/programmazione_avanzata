@@ -38,7 +38,7 @@ export async function read(req, res){
 }
 
 
-export async function segmentation(req, res, next){
+/* export async function segmentation(req, res, next){
 	// spawn new child process to call the python script
 	const process = await spawn('python3', ['./python/SAM_inference.py', req.user.files ] );
 	
@@ -48,7 +48,25 @@ export async function segmentation(req, res, next){
 	});
 	   
 	process.on('close', (code) => {
-		console.log("Inference completed");
+		console.log("Inference completed => result sent to client");
 		res.status(200).json( JSON.parse( pyOutput ) );
+	});
+} */
+
+
+export function segmentation(imgList, done){
+	// spawn new child process to call the python script
+	const process = spawn('python3', ['./python/SAM_inference.py', imgList[0] ] );
+	
+	process.stdout.on('data', (data) => {
+		// Do something with the data returned from python script
+		pyOutput = data.toString()
+	});
+	   
+	process.on('close', (code) => {
+		console.log("Inference completed");
+		done();
+		return pyOutput;
+		//res.status(200).json( JSON.parse( pyOutput ) );
 	});
 }

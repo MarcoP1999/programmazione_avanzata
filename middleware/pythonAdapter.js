@@ -87,25 +87,32 @@ function read(req, res) {
     });
 }
 exports.read = read;
-function segmentation(req, res, next) {
-    return __awaiter(this, void 0, void 0, function () {
-        var process;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, spawn('python3', ['./python/SAM_inference.py', req.user.files])];
-                case 1:
-                    process = _a.sent();
-                    process.stdout.on('data', function (data) {
-                        // Do something with the data returned from python script
-                        pyOutput = data.toString();
-                    });
-                    process.on('close', function (code) {
-                        console.log("Inference completed");
-                        res.status(200).json(JSON.parse(pyOutput));
-                    });
-                    return [2 /*return*/];
-            }
-        });
+/* export async function segmentation(req, res, next){
+    // spawn new child process to call the python script
+    const process = await spawn('python3', ['./python/SAM_inference.py', req.user.files ] );
+    
+    process.stdout.on('data', (data) => {
+        // Do something with the data returned from python script
+        pyOutput = data.toString()
+    });
+       
+    process.on('close', (code) => {
+        console.log("Inference completed => result sent to client");
+        res.status(200).json( JSON.parse( pyOutput ) );
+    });
+} */
+function segmentation(imgList, done) {
+    // spawn new child process to call the python script
+    var process = spawn('python3', ['./python/SAM_inference.py', imgList[0]]);
+    process.stdout.on('data', function (data) {
+        // Do something with the data returned from python script
+        pyOutput = data.toString();
+    });
+    process.on('close', function (code) {
+        console.log("Inference completed");
+        done();
+        return pyOutput;
+        //res.status(200).json( JSON.parse( pyOutput ) );
     });
 }
 exports.segmentation = segmentation;

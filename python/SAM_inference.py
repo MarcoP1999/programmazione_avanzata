@@ -18,14 +18,12 @@ from segment_anything import SamAutomaticMaskGenerator
 
 
 def measureAreas(masks):
-	#print("Segmented obj:" + str(len(masks))+"\n\n")
 	totalArea = 0
 	areas = []
 	for i in range(len(masks)):
 		totalArea += masks[i].get('area')
 	for i in range(len(masks)):
 		areas.append( round(masks[i].get('area')/totalArea*100, 1) )
-		#print("Segmented item "+str(i)+ " is " + str( round(masks[i].get('area')/totalArea*100, 1)) +"% of total area")
 	return areas
 
 def getTotalArea(masks):
@@ -53,9 +51,10 @@ for current in sys.argv[1].split(","):
 	imageMask = mask_generator1.generate(image)
 
 	maskObj = {
-		"objects" : len(imageMask),
+		"segmentedAreas" : len(imageMask),
 		"totalarea": getTotalArea(imageMask),
-		"segmentedArea": measureAreas(imageMask)
+		"objects": measureAreas(imageMask)
 	}
 	objList.append( json.dumps(maskObj) )
-print("{ \"segmented\": " + (str(objList)).replace("'", "") + "}")
+#print("{ \"segmented\": " + (str(objList)).replace("'", "") + "}")
+print( (str(objList)).replace("'", "") )

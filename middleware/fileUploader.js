@@ -59,8 +59,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.unpackZip = exports.checkFormat = exports.bill = exports.saveImgFS = void 0;
+exports.unpackZip = exports.checkFormat = exports.billSegmentation = exports.billUpload = exports.saveImgFS = void 0;
+var datasetModel = __importStar(require("../model/Datasets.js"));
 var userModel = __importStar(require("../model/Users.js"));
+var fileModel = __importStar(require("../model/Files.js"));
 var fs = require('fs');
 var path = require('path');
 var AdmZip = require("adm-zip");
@@ -81,20 +83,19 @@ function saveImgFS(req, res, next, currentFile) {
     });
 }
 exports.saveImgFS = saveImgFS;
-function bill(req, res, next) {
+function billUpload(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var currentBudget;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, userModel.getBudget(req.user.email)];
                 case 1:
-                    currentBudget = _a.sent();
-                    console.log("current budget: " + currentBudget.dataValues.budget);
-                    console.log("n of files: " + req.user.files.length);
-                    if (currentBudget.dataValues.budget >= 0.5 * req.user.files.length) {
-                        req.currentBudget = currentBudget.dataValues.budget;
-                        req.budgetProposal = currentBudget.dataValues.budget - (0.5 * req.user.files.length);
-                        console.log("budget proposal: " + req.budgetProposal);
+                    currentBudget = (_a.sent()).dataValues.budget;
+                    console.log("Current budget: " + currentBudget);
+                    console.log("N of files to Upload: " + req.user.files.length);
+                    if (currentBudget >= 0.5 * req.user.files.length) {
+                        req.budgetProposal = currentBudget - (0.5 * req.user.files.length);
+                        console.log("New budget proposal: " + req.budgetProposal);
                         next();
                     }
                     else {
@@ -106,7 +107,39 @@ function bill(req, res, next) {
         });
     });
 }
-exports.bill = bill;
+exports.billUpload = billUpload;
+function billSegmentation(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var currentBudget, fileCount, _a, _b, budgetProposal;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
+                case 0: return [4 /*yield*/, userModel.getBudget(req.user.email)];
+                case 1:
+                    currentBudget = (_c.sent()).dataValues.budget;
+                    console.log("current budget: " + currentBudget);
+                    _b = (_a = fileModel).readFiles;
+                    return [4 /*yield*/, datasetModel.getdatasetPK(req.user.dataset, req.user.email)];
+                case 2: return [4 /*yield*/, _b.apply(_a, [_c.sent()])];
+                case 3:
+                    fileCount = (_c.sent()).length;
+                    console.log("N of files to segment: " + fileCount);
+                    if (currentBudget >= 4 * fileCount) {
+                        budgetProposal = currentBudget - (4 * fileCount);
+                        userModel.updateBudget(budgetProposal, req.user.email);
+                        console.log("New budget: " + budgetProposal);
+                        next();
+                    }
+                    else {
+                        console.log("Not enough credit for user");
+                        res.status(401).send("Required " + (4 * fileCount) + " credits to start segmentation.\n "
+                            + req.user.email + " has just " + currentBudget);
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.billSegmentation = billSegmentation;
 function checkFormat(req, res, next) {
     var accepted_extensions = [".jpg", ".jpeg", ".bmp", ".png", ".zip"];
     var accepted = true;

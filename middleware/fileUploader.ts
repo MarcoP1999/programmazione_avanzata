@@ -1,5 +1,6 @@
 import * as datasetModel from "../model/Datasets.js";
 import * as userModel from "../model/Users.js";
+import * as fileModel from "../model/Files.js"
 
 let fs = require('fs');
 let path = require('path')
@@ -17,19 +18,36 @@ export async function saveImgFS(req, res, next, currentFile){
 } 
 
 
-export async function bill(req, res, next){
-	let currentBudget = await userModel.getBudget(req.user.email)
-	console.log("current budget: "+ currentBudget.dataValues.budget);
-	console.log("n of files: "+req.user.files.length)
-	if(currentBudget.dataValues.budget >= 0.5*req.user.files.length){
-		req.currentBudget = currentBudget.dataValues.budget;
-		req.budgetProposal = currentBudget.dataValues.budget - (0.5*req.user.files.length);
-		console.log("budget proposal: "+ req.budgetProposal)
+export async function billUpload(req, res, next){
+	let currentBudget = (await userModel.getBudget(req.user.email)).dataValues.budget
+	console.log("Current budget: "+ currentBudget);
+	console.log("N of files to Upload: "+req.user.files.length)
+	if(currentBudget >= 0.5*req.user.files.length){
+		req.budgetProposal = currentBudget - (0.5*req.user.files.length);
+		console.log("New budget proposal: "+ req.budgetProposal)
 		next();
 	}
 	else{
 		console.log("Not enough credit for user")
 		res.status(401).send("Not enough credit for user: "+req.user.email)
+	}
+}
+
+
+export async function billSegmentation(req, res){
+	let currentBudget = (await userModel.getBudget(req.user.email)).dataValues.budget
+	console.log( "current budget: "+ currentBudget );
+	res.locals.fileCount = (await fileModel.readFiles( await datasetModel.getdatasetPK(req.user.dataset, req.user.email) ) ).length
+	console.log( "N of files to segment: "+res.locals.fileCount )
+	if(currentBudget >= 4*res.locals.fileCount ){
+		let budgetProposal = currentBudget - (4*res.locals.fileCount );
+		userModel.updateBudget(budgetProposal, req.user.email);
+		console.log("New budget: "+ budgetProposal)
+		return true;
+	}
+	else{
+		console.log("Not enough credit for user")
+		return false;
 	}
 }
 

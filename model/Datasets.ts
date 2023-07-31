@@ -39,7 +39,11 @@ export async function newDataset(owner: string, name: string ) {
 	}
 }
 
-
+/**
+   * Lista dei dataset di proprietà di un utente.
+   * @param email @param role
+   * @returns <SequelizeModel>.
+   */
 export async function getDatasets(role: Number, owner: string ) {
 	let datasets:any;
 	let list = [];
@@ -54,7 +58,6 @@ export async function getDatasets(role: Number, owner: string ) {
 	}
 	catch (err)	{
 		console.log(err);
-		return 0;
 	}
 }
 

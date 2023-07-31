@@ -83,6 +83,11 @@ function newDataset(owner, name) {
     });
 }
 exports.newDataset = newDataset;
+/**
+   * Lista dei dataset di proprietà di un utente.
+   * @param email @param role
+   * @returns <SequelizeModel>.
+   */
 function getDatasets(role, owner) {
     return __awaiter(this, void 0, void 0, function () {
         var datasets, list, err_2;
@@ -108,7 +113,7 @@ function getDatasets(role, owner) {
                 case 6:
                     err_2 = _a.sent();
                     console.log(err_2);
-                    return [2 /*return*/, 0];
+                    return [3 /*break*/, 7];
                 case 7: return [2 /*return*/];
             }
         });

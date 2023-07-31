@@ -110,29 +110,30 @@ function billUpload(req, res, next) {
 exports.billUpload = billUpload;
 function billSegmentation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var currentBudget, fileCount, _a, _b, budgetProposal;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
+        var currentBudget, _a, _b, _c, budgetProposal;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
                 case 0: return [4 /*yield*/, userModel.getBudget(req.user.email)];
                 case 1:
-                    currentBudget = (_c.sent()).dataValues.budget;
+                    currentBudget = (_d.sent()).dataValues.budget;
                     console.log("current budget: " + currentBudget);
-                    _b = (_a = fileModel).readFiles;
+                    _a = res.locals;
+                    _c = (_b = fileModel).readFiles;
                     return [4 /*yield*/, datasetModel.getdatasetPK(req.user.dataset, req.user.email)];
-                case 2: return [4 /*yield*/, _b.apply(_a, [_c.sent()])];
+                case 2: return [4 /*yield*/, _c.apply(_b, [_d.sent()])];
                 case 3:
-                    fileCount = (_c.sent()).length;
-                    console.log("N of files to segment: " + fileCount);
-                    if (currentBudget >= 4 * fileCount) {
-                        budgetProposal = currentBudget - (4 * fileCount);
+                    _a.fileCount = (_d.sent()).length;
+                    console.log("N of files to segment: " + res.locals.fileCount);
+                    if (currentBudget >= 4 * res.locals.fileCount) {
+                        budgetProposal = currentBudget - (4 * res.locals.fileCount);
                         userModel.updateBudget(budgetProposal, req.user.email);
                         console.log("New budget: " + budgetProposal);
-                        next();
+                        return [2 /*return*/, true];
                     }
                     else {
                         console.log("Not enough credit for user");
-                        res.status(401).send("Required " + (4 * fileCount) + " credits to start segmentation.\n "
-                            + req.user.email + " has just " + currentBudget);
+                        return [2 /*return*/, false];
+                        //res.status(401).send("Your budget "+currentBudget+" is not enough.\nRequired "+ String(4*res.locals.fileCount) )
                     }
                     return [2 /*return*/];
             }

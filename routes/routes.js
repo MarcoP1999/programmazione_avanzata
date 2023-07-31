@@ -132,54 +132,76 @@ router.post("/upload", auth.checkUser, uploader.checkFormat, uploader.unpackZip,
     });
 }); });
 //-------------------- Queues ------------------------------------------
-//brew services start redis  //required for local usage of Bull
+var pythonAdapter = __importStar(require("../middleware/pythonAdapter.js"));
 var Queue = require('bull');
-var queue = new Queue('python');
-queue.on('progress', function (job, progress) {
-    console.log(job.id + "is RUNNING");
+var queue = new Queue('python', {
+    redis: {
+        host: '127.0.0.1',
+        port: 6379
+    },
+    settings: {
+        lockDuration: 360000
+    }
 });
-queue.on('error', function (job, progress) {
-    console.log(job.id + " ERROR");
+queue.process(function (job) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        if (uploader.billSegmentation) {
+            console.log("Started a process consumer");
+            return [2 /*return*/, pythonAdapter.segmentation(job.data.images)];
+        }
+        else
+            job.moveToFailed();
+        return [2 /*return*/];
+    });
+}); });
+var jobStates = Object.create(null);
+queue.on('global:completed', function (jobId) {
+    console.log("Inference completed (Queue)");
+    jobStates[jobId] = "completed"; //then remove from Dict
+    console.log("ID:" + jobId);
+});
+queue.on('error', function (error) {
+});
+queue.on('waiting', function (job) {
+    // A Job is waiting to be processed as soon as a worker is idling.
+    //res.jobStates(200).send("jobStates: ", job.id, " is waiting to be executed");
+    jobStates[job.name] = "waiting";
+});
+queue.on('active', function (job, jobPromise) {
+    //res.jobStates(200).send("Job: "+job.id+ "=> Model is running: "+progress*100+"%");
+    jobStates[job.name] = "active";
+});
+queue.on('failed', function (job) {
+    //res.jobStates(401).send("Job: "+job.id+"failed.\nRequired " +(4*res.locals.fileCount )+ 
+    //" credits to start segmentation.\n "+req.user.email+" has just "+ userCnt.getBudget(req, res) );
+    jobStates[job.name] = "failed";
 });
 //-------------------- Python ------------------------------------------
-var pythonAdapter = __importStar(require("../middleware/pythonAdapter"));
-router.get("/py", auth.checkUser, 
-//pythonAdapter.configModel,
-userCnt.getDBfiles, uploader.billSegmentation, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+router.get("/py", auth.checkUser, userCnt.getDBfiles, 
+//uploader.billSegmentation,
+function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         return [2 /*return*/];
     });
 }); });
-router.get("/process", auth.checkUser, userCnt.getDBfiles, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+router.get("/process", auth.checkUser, userCnt.getDBfiles, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var pid;
     return __generator(this, function (_a) {
-        res.locals.pid = "pid_" + Math.random().toString(36).slice(10);
-        queue.add({ images: req.user.files });
-        queue.on('global:completed', function (jobId, result) {
-            console.log("Job ".concat(jobId, " COMPLETED with result ").concat(result));
-            console.log(res.locals.segmented);
-            res.status(200).send("Job ".concat(jobId, " COMPLETED with result ").concat(result));
-        });
-        queue.process(function (job, done) {
-            console.log(job);
-            res.locals.segmented = pythonAdapter.segmentation(job.data.images, done);
-        });
-        return [2 /*return*/];
+        switch (_a.label) {
+            case 0:
+                pid = "pid_" + Math.random().toString(36).slice(10);
+                return [4 /*yield*/, queue.add({ images: req.user.files }).then()];
+            case 1:
+                _a.sent();
+                res.status(200).send("Job: " + pid + " added to processing queue");
+                return [2 /*return*/];
+        }
     });
 }); });
+var qManager = __importStar(require("../middleware/queueManager.js"));
 router.get("/status", auth.checkUser, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        queue.on('error', function (error) {
-            // An error occured.
-        });
-        queue.on('waiting', function (jobId) {
-            // A Job is waiting to be processed as soon as a worker is idling.
-        });
-        queue.on('progress', function (job, progress) {
-            // A job's progress was updated!
-        });
-        queue.on('completed', function (job, result) {
-            // A job successfully completed with a `result`.
-        });
+        qManager.sendResponse(req, res, jobStates[req.pid]);
         return [2 /*return*/];
     });
 }); });

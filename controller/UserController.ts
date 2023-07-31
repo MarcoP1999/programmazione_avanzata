@@ -2,7 +2,6 @@ import * as userModel from "../model/Users.js";
 import * as datasetModel from "../model/Datasets.js";
 import * as uploader from "../middleware/fileUploader.js";
 import * as fileModel from "../model/Files.js";
-import { INTEGER } from "sequelize";
 
 export class UserController{
 
@@ -78,8 +77,11 @@ export class UserController{
 	public getDBfiles =  async (req, res, next) => {
 		req.user.files = [] //clears file list
 		let datasetPK = await datasetModel.getdatasetPK(req.user.dataset, req.user.email);
-
+		if(! datasetPK)
+			res.status(404).send("Dataset not found");
 		let datasetElems = await fileModel.readFiles(datasetPK);
+		if(! datasetElems)
+			res.status(404).send("No files in this dataset");
 		datasetElems.forEach(element => {
 			req.user.files.push(element.dataValues.filepath)
 		});

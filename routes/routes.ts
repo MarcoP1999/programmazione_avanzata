@@ -80,89 +80,102 @@ router.post("/upload",
 );
 
 
-//-------------------- Queues ------------------------------------------
 
-//brew services start redis  //required for local usage of Bull
+//-------------------- Queues ------------------------------------------
+import * as pythonAdapter from "../middleware/pythonAdapter.js"
+
 const Queue = require('bull');
-const queue = new Queue('python');
+const queue = new Queue('python', {
+	redis: {
+	  host: '127.0.0.1',
+	  port: 6379
+	},
+	settings:{
+		lockDuration: 360000
+	}
+});
+
+
+queue.process(async (job) => {
+	if( uploader.billSegmentation ){
+		console.log("Started a process consumer")
+		return pythonAdapter.segmentation(job.data.images);
+	}
+	else
+		job.moveToFailed();
+});
+
+
+const jobStates = Object.create(null)
+
+queue.on('global:completed', function(jobId){
+	console.log("Inference completed (Queue)");
+	jobStates[jobId] = "completed"; //then remove from Dict
+	console.log("ID:"+jobId);
+})
+
+queue.on('error', function(error) {
+})
+  
+queue.on('waiting', function(job){
+	// A Job is waiting to be processed as soon as a worker is idling.
+	//res.jobStates(200).send("jobStates: ", job.id, " is waiting to be executed");
+	jobStates[job.name] = "waiting";
+});
+
+queue.on('active', function(job, jobPromise){
+	//res.jobStates(200).send("Job: "+job.id+ "=> Model is running: "+progress*100+"%");
+	jobStates[job.name] = "active";
+})
+
+queue.on('failed', function(job){
+	//res.jobStates(401).send("Job: "+job.id+"failed.\nRequired " +(4*res.locals.fileCount )+ 
+		//" credits to start segmentation.\n "+req.user.email+" has just "+ userCnt.getBudget(req, res) );
+	jobStates[job.name] = "failed";
+})
+
 
 
 //-------------------- Python ------------------------------------------
-import * as pythonAdapter from "../middleware/pythonAdapter";
-
 router.get("/py",
 	auth.checkUser,
-	//pythonAdapter.configModel,
 	userCnt.getDBfiles,
-	uploader.billSegmentation,
-	async (req, res, next) => {
-		//await pythonAdapter.segmentation(req, res, next);
+	//uploader.billSegmentation,
+	async (req, res) => {
+		//pythonAdapter.segmentation(res, req.user.files);
 	}
 );
+
+
 
 router.get("/process",
 	auth.checkUser,
 	userCnt.getDBfiles,
-	async (req, res, next) => {
-		res.locals.pid = "pid_" + Math.random().toString(36).slice(10);
-
-		queue.add( {images: req.user.files} );
-		
-		queue.on('global:completed', (jobId, result) => {
-			console.log(`Job ${jobId} COMPLETED with result ${result}`);
-			console.log(res.locals.segmented)
-			res.status(200).send(`Job ${jobId} COMPLETED with result ${result}`)
-		})
-
-		queue.process( (job, done) => {
-			if(  <unknown>uploader.billSegmentation == true ){
-				res.locals.segmented = pythonAdapter.segmentation(job.data.images, done);
-			}
-			else{
-				job.moveToFailed();
-			}
-		});
-		//res.status(200).send("Added process: "+ res.locals.pid +" to the queue")
+	async (req, res) => {
+		let pid = "pid_" + Math.random().toString(36).slice(10);
+		await queue.add( {images: req.user.files} ).then();
+		res.status(200).send("Job: "+pid+" added to processing queue")
 	}
 );
 
+import * as qManager from "../middleware/queueManager.js"
 router.get("/status",
 	auth.checkUser,
 	async (req, res, next) => {
-
-		queue.on('completed', function(job, result){
-			console.log("Inference completed (Queue)");
-			res.status(200).send("Job "+job.id+" completed (QUEUE)")
-			//res.status(200).json( JSON.parse( pyOutput ) );
-		})
-
-		queue.on('error', function(error) {
-			res.status(401).send(error);
-		})
-		  
-		queue.on('waiting', function(job){
-			// A Job is waiting to be processed as soon as a worker is idling.
-			res.status(200).send("Process: ", job.id, " is waiting to be executed");
-		});
-
-		queue.on('progress', function(job, progress){
-			res.status(200).send("Job: "+job.id+ "=> Model is running: "+progress*100+"%");
-		})
-
-		queue.on('failed', function(job){
-			res.status(401).send("Job: "+job.id+"failed.\nRequired " +(4*res.locals.fileCount )+ 
-								" credits to start segmentation.\n "+req.user.email+" has just "+ userCnt.getBudget(req, res) );
-		})
+		qManager.sendResponse(req, res, jobStates[req.pid] );
 	}
 );
+
+
 
 
 //-------------------- Error Fallback --------------------------------------
 router.get("*", async (req, res) => {
-  res.sendStatus(404);
-});
-router.post("*", async (req, res) => {
-  res.sendStatus(404);
-});
+	res.sendStatus(404);
+  });
+  router.post("*", async (req, res) => {
+	res.sendStatus(404);
+  });
+
 
 module.exports = router;

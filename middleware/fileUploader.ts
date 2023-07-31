@@ -34,7 +34,7 @@ export async function billUpload(req, res, next){
 }
 
 
-export async function billSegmentation(req, res){
+export async function billSegmentation(req, res, next){
 	let currentBudget = (await userModel.getBudget(req.user.email)).dataValues.budget
 	console.log( "current budget: "+ currentBudget );
 	res.locals.fileCount = (await fileModel.readFiles( await datasetModel.getdatasetPK(req.user.dataset, req.user.email) ) ).length
@@ -48,6 +48,7 @@ export async function billSegmentation(req, res){
 	else{
 		console.log("Not enough credit for user")
 		return false;
+		//res.status(401).send("Your budget "+currentBudget+" is not enough.\nRequired "+ String(4*res.locals.fileCount) )
 	}
 }
 

@@ -176,9 +176,13 @@ var UserController = /** @class */ (function () {
                         return [4 /*yield*/, datasetModel.getdatasetPK(req.user.dataset, req.user.email)];
                     case 1:
                         datasetPK = _a.sent();
+                        if (!datasetPK)
+                            res.status(404).send("Dataset not found");
                         return [4 /*yield*/, fileModel.readFiles(datasetPK)];
                     case 2:
                         datasetElems = _a.sent();
+                        if (!datasetElems)
+                            res.status(404).send("No files in this dataset");
                         datasetElems.forEach(function (element) {
                             req.user.files.push(element.dataValues.filepath);
                         });

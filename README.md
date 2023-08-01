@@ -11,9 +11,29 @@ Data la richiesta computazionale elevata in fase di inferenza, il tutto verrà g
 ## Progettazione
 
 ### UML
-![UML con le rotte da definire](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Use_Case.png)
-### Diagrammi delle sequenze e funzionamento
-Foriremo in questa sezione una breve descrizione di ogni rotta e il diagramma di flusso ad essa associata.
+![](docs/Use_Case.png)
+
+### Sequence diagram
+Si riportano i diagrammi di attivazione dei componenti coinvolti durante l'esecuzione delle richieste.
+* Verificare il credito di un utente
+![](docs/readBudget.png)
+* Ricaricare il credito di un utente
+![](docs/chargeBudget.png)
+* Mostrare i dateset di un utente o tutti i dataset in caso di utente admin
+![](docs/showDataset.png)
+* Rinominare/cancellazione di un dataset
+![](docs/rename_delete.png)
+* Caricamento di un'immagine in un dataset
+![](docs/insertImage.png)
+* Caricare un file .zip che verrà poi estratto in un insieme di immagini
+![](docs/insertZIP.png)
+* Nuovo task di segmentazione
+![](docs/process.png)
+* Verifica dello stato/completamento di un task
+![](docs/result.png)
+
+## Utilizzo
+In questa sezione vengono descritte tutte le possibili rotte che esplicano le funzionalità messe a disposizione dall'applicazione e i parametri della richiesta necessari.
 | Verbo | Rotta |Descrizione|
 | --- | --- | --- |
 | GET | /budget | Leggere il credito di un utente |
@@ -26,59 +46,200 @@ Foriremo in questa sezione una breve descrizione di ogni rotta e il diagramma di
 | GET | /process | Richiesta di un nuovo task di segmentazione |
 | GET | /status | Controllo dello stato attuale di un task avviato. In caso di completamento viene restituito il risultato della segmentazione (json) |
 
-Seguendo l'ordine della tabella soprastante:
-* ![Diagramma di flusso per verificare il credito di un utente](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/readBudget.png)
-* ![Diagramma di flusso per ricaricare il credito di un utente](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/chargeBudget.png)
-* ![Diagramma di flusso per mostrare i dateset di un utente o tutti i dataset in caso di utente admin](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141652.png)
-* ![Diagramma di flusso per rinominare un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141733.png)
-* ![Diagramma di flusso per cancellare un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141733.png)
-* ![Diagramma di flusso per caricare un'immagine in un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/insertImage.png)
-* ![Diagramma di flusso per caricare un file zip che verrà poi spacchettato in un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/insertZIP.png)
-...
-Per far funzionare queste rotte bisogna genereare un token JWT con gli adeguati parametri e con le credenziali di un utente autenticato(admin e non) e poi passarlo a Postman che risponderà alla richiesta.
+### Payloads
+
+Per effettuare una richiesta al servizio bisogna inviare alla rotta prescelta, un ***Bearer Token*** che contenga al suo interno:
+- la *signature* di autenticazione
+- un *payload* con i parametri della richiesta, da inviare all'Api
+
+>###### Postman Collections:<a name="postman"></a>
+>https://elements.getpostman.com/redirect?entityId=28770373-ce316422-d0e3-4a6f-97da-53c6a2cf5429&entityType=collection
+
+
+Riportiamo i payload di tutte le rotte utilizzabili.
+
+```Json
+POST /upload  (immagini)
+{
+  "email": "user@user.com",
+  "role": "1",
+  "dataset": "flowers",
+  "files": [
+    "/usr/src/images/f1.jpg",
+    "/usr/src/images/f2.jpg",
+    "/usr/src/images/f3.jpg"
+  ]
+}
+```
+```Json
+POST /upload  (file .zip)
+{
+  "email": "user@user.com",
+  "role": "1",
+  "dataset": "dogs",
+  "files": [
+    "/usr/src/images/pack.zip"
+  ]
+}
+```
+```Json
+POST /upload  (test unsupported file)
+{
+  "email": "user@user.com",
+  "role": "1",
+  "budget": 99,
+  "receiver": "user2@user.com",
+  "dataset": "flowers",
+  "newName": "flowers1",
+  "files": [
+    "/Users/dataset/f1.jpg",
+    "/Users/dataset/f1.zip",
+    "/Users/dataset/f1.ppt"
+  ]
+}
+```
+```Json
+GET /dataset  |  GET /budget
+{
+  "email": "user@user.com",
+  "role": "1"
+}
+```
+```Json
+GET /dataset  (amministratore)
+{
+  "email": "admin@admin.com",
+  "role": "0"
+}
+```
+```Json
+PATCH /budget  (amministratore)
+{
+  "email": "admin@admin.com",
+  "role": "0",
+  "receiver": "user@user.com",
+  "budget": 200
+}
+```
+```Json
+POST /dataset
+{
+  "email": "user@user.com",
+  "role": "1",
+  "dataset": "flowers"
+}
+```
+```Json
+PATCH /dataset   |  DELETE /dataset
+{
+  "email": "user@user.com",
+  "role": "1",
+  "dataset": "flowers",
+  "newName": "flowers1"
+}
+```
+```Json
+{
+  "email": "user@user.com",
+  "role": "1",
+  "dataset": "flowers"
+}
+```
+
+```Json
+GET /process
+{
+  "email": "user@user.com",
+  "role": "1",
+  "dataset": "flowers"
+}
+```
+```Json
+GET /process
+{
+  "email": "user@user.com",
+  "role": "1",
+  "dataset": "flowers",
+  "pid": "pid_a1f"
+}
+```
+
+- E' possibile generare un token personalizzato mediante il servizio https://jwt.io/
+- Si è convenuto usare il valore '0' per indicare un'account amministratore e '1' per lo user. 
+#### Utenti predefiniti
+|Email|Ruolo|Payload|
+|---|---|--|
+|user@user.com| *user* | 1|
+|user2@user.com| *user*|1|
+|admin@admin.com|*admin*|0|
 
 ## Pattern usati
 
 ### Singleton
 
-Il pattern Singleton garantisce che per una classe venga creata una e una sola istanza. Nel caso della nostra applicazione viene usato con la classe che permette la connessione al Database per evitare richieste multiple.
+Il pattern Singleton garantisce che per una classe venga creata una ed una sola istanza. 
+L'applicazione lo implementa nella classe [Database.ts](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/model/Database.ts) in modo da permettere un'unica istanza di connessione al Database evitando richieste multiple.
+
 ### MVC
 
-Questa applicazione si basa sul pattern MVC, composto quindi da una parte di Model, una di View e una di Controller.
-*Il Model contiene i dati dell'applicazione, ma non la logica che dice come presentarli all'utente.
-*La View sarebbe l'interfaccia, ma dato che nella nostra applicazione non è richiesto implementarla, la nostra View sarà Postman.
-*Il Controller elabora i dati del Model e li passa all'interfaccia, in base alle richieste dell'utente.
-Nel nostro caso c'è anche l'integrazione di una parte di Routing, con delle rotte che raccolgono le richieste e le inviano al corrispondente Controller. 
+L'intera applicazione si basa sul pattern Model View Controller:  
+* Il Model contiene l'interfaccia di accesso ai dati, ma non la logica di gestione o visualizzazione.
+* La View corrisponde all'interfaccia grafica (GUI), ma dato che le specifiche non ne richiedevano l'implementazione, si invieranno i comandi tramite Postman.
+* Il Controller gestisce i dati del Model, li manipola e realizza le funzioni implementate.  
+Al termine li invia all'interfaccia che può variare, lasciando inalterata logica di business dell'applicazione.
+  
 
-### Chain of responsability(Middleware)
+### Chain of responsibility (Middleware)
 
-Con middleware viene inteso uno strato intermedio che si occupa di validare le richieste che in questo caso sono prese dalle rotte.Tutte le richieste della nostra applicazione sono passate al vaglio dei vari middleware, che verificano la validità del token associato alla richiesta e della coerenza dei dati inseriti, e la possibilità di realizzare determinate azioni.
+Per *middleware* si intende uno strato software precedente il controller, che mette a disposizione funzionalità intermedie.
+In questo caso si occupa di:
+- validare l'identità delle richieste e la [(Authorization)](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/middleware/authorization.ts);
+- controllare la validità dei [file](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/middleware/fileUploader.ts) prima dell'upload e processamento;
+- intermediatore tra il framework e il [processo Python](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/middleware/pythonAdapter.ts) che implementa il modello SAM;
 
+Più metodi middleware vengono collegati 'in cascata' su determinate rotte, prima di attivare il controller predisposto.
 
-## Metodo di utilizzo
-Per testare il progetto, è necessario seguire questi passaggi:
+## Workflow di utilizzo
+Per utilizzare il progetto, è necessario seguire questi passaggi:
 
-1. Scaricare il progetto copiando l'URL del repository Git o scaricando il file ZIP.
-2. Importare il pacchetto di chiamate fornito nella cartella postman in Postman.
-3. Compilare il file .env con i dati qui forniti:
-4. Installare Docker dal sito ufficiale.
-5. Avviare Docker e assicurarsi che i servizi necessari per il progetto siano in esecuzione.
-6. Utilizzare Postman per inviare le chiamate al server e verificare le risposte.
-Lanciare quindi i seguenti comandi nella giusta directory:
-```javascript
-'docker compose build'
-'docker compose up'
+1. Recuperare il progetto tramite l'URL del repository Git (wget) o scaricando manualmente il file ZIP.
+2. Importare il pacchetto di chiamate [Postman](#postman).
+3. Compilare il file **.env** con i dati consigliati:
+
+```Javascript
+PGUSER = postgres  
+PGPASSWORD = postgres  
+PGDATABASE = SAM_storage
+PGHOST = postgres_db //come il Docker service
+PGPORT = 5432
+REDIS_HOST = cache
+REDIS_PORT = 6379
+APPPORT = 8080
+APPHOST = 0.0.0.0
+SECRET_KEY = sam
+//share host folder (with img to upload) to container
+LOCAL_DATASET = /Users/dataset/  
 ```
+4. Installare Docker dal sito ufficiale ed avviare l'engine.
+5. Aprire il terminale posizionandosi nella cartella di progetto; poi digitare
+```
+docker compose up
+```
+6. Inviare le chiamate al server per ottenere le risposte dall'api.
+
 ## Software utilizzati
 * [Express.js](https://expressjs.com/it/)
 * [Postgres](https://www.postgresql.org/)
 * [Node.js](https://nodejs.org/en)
-* [JWT](https://jwt.io/)
-* [VSC](https://code.visualstudio.com/)
+* [JsonWebToken](https://jwt.io/)
+* [VisualStudio Code](https://code.visualstudio.com/)
 * [Typescript](https://www.typescriptlang.org/)
 * [Docker](https://www.docker.com/)
 * [Sequelize](https://sequelize.org/)
+* [BullMQ](https://docs.bullmq.io/)
 * [Postman](https://www.postman.com/)
+* [Segment Anything Model](https://github.com/facebookresearch/segment-anything)
+
 ## Autori
-* [Alesi Mattia](https://github.com/alesimattia)
-* [Proietti Marco](https://github.com/MarcoP1999)
+* [Alesi Mattia &nbsp; s1114418](https://github.com/alesimattia)
+* [Proietti Marco &nbsp; s1114163](https://github.com/MarcoP1999)

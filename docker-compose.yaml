@@ -27,7 +27,9 @@ services:
                 ports:
                     - 8080:8080
                 env_file:
-                 - .env
+                    - .env
+                volumes:
+                    - ${LOCAL_DATASET}:/usr/src/images
                 depends_on:
                     - postgres_db
                     - cache

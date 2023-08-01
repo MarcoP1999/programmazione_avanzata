@@ -28,20 +28,18 @@ const Files = sequelize.define(
 	}
 );
 
-export async function saveImgDB(dataset_id, elementPath) {
+export async function writeDB(dataset_id, elementPath) {
 	try{
-		let newfile = await Files.create({
+		return await Files.create({
 			fk_dataset: dataset_id,
 			filepath: elementPath
 		});
-		if(newfile)
-			return true;
 	}
 	catch (err)	{
 		console.log(err);
-		return false;
 	}
 }
+
 
 export async function readFiles(dataset_id){
 	try{

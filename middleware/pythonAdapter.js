@@ -47,7 +47,7 @@ function segmentation(imgList) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    process = (0, child_process_1.spawn)('python3', ['./python/SAM_inference.py', imgList[0]]);
+                    process = (0, child_process_1.spawn)('python3', ['./python/SAM_model.py', imgList[0]]);
                     process.stdout.on('data', function (data) {
                         pyOutput = data.toString();
                     });

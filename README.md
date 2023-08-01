@@ -1,26 +1,12 @@
 # Progetto programmazione avanzata
 
 ## Obiettivo
-L'obiettivo principale è di sviluppare un backend Node.js per processare e gestire i dataset di un modello di una rete neurale.
-Gli utenti hanno la possibilità di caricare immagini e video in dataset, anch'essi caricabili.
-Una delle principali funzionalità sarà quella di effettuare inferenze sui dataset e modelli caricati.
-Sono state predisposte le seguenti rotte:
-* Creazione di un data-set (fornire metadati minimi come nome ed una serie di tag sotto forma di lista di parole); all’inizio il data-set risulta vuoto.
-* Cancellazione (logica) di un data-set
-* Ottenere la lista dei data-set
-* Aggiornamento di un data-set (con verifica della non sovrapposizione con progetti dello stesso utente con lo stesso nome)
-* Inserimento di un contenuto all’interno del data-set:
-  *Caricamento di una immagine
-  * Caricamento di un insieme di frame sotto forma di zip
-  * Il costo associato ad ogni immagine è di 0.5 token; deve essere verificato se il credito disponibile è sufficiente a gestire la richiesta.
-* Effettuare un’inferenza su uno specifico data-set utilizzando SAM. Restituire l’id del processamento che consentirà di richiedere lo stato del processamento ed alla fine consentirà di ottenere il JSON contenente i dettagli dell’inferenza.
-* Ogni richiesta di inferenza ha un costo di 4 token / immagine. L’inferenza ha luogo se i crediti associati all’utente sono sufficienti. Annullare apriori il processamento se il credito non è sufficiente.
-* Creare una rotta che consenta di valutare lo stato di avanzamento del processamento distinguendo le fasi. Ad esempio, PENDING (in coda), RUNNING (in fase di inferenza), FAILED (in caso di errore riportando anche la tipologia di errore), ABORTED (credito non sufficiente), COMPLETED (processamento data-set completo).
-* In caso di COMPLETED ritornare anche il risultato dell’inferenza sotto forma di JSON espresso come per ogni immagine il numero di oggetti segmentati e per ciascuno l’area espressa sotto forma di percentuale rispetto all’area totale;
-* Creare una rotta che consenta dato l’id del processamento, se COMPLETED, di scaricare una immagine o uno zip che contiene il risultato dell’inferenza (maschera di segmentazione).
-L’inferenza deve avvenire mediante una gestione delle code con Bull che consenta di interfacciare il codice già disponibile per effettuare l’inferenza (codice python).
-* Restituire il credito residuo di un utente (necessaria autenticazione mediante token JWT)
-Si chiede di sviluppare il codice possibilmente utilizzando typescript.
+Si intende sviluppare un backend Node.js per processare e gestire i dataset di un modello di una rete neurale.
+Gli utenti hanno la possibilità di caricare immagini o un insieme di frame (.zip) in uno specifico dataset, creabili a piacimento.
+\
+Una delle principali funzionalità sarà quella di effettuare task di segmentazione sui dataset, utilizzando il modello preaddestrato [*Segment Anything Model*](https://github.com/facebookresearch/segment-anything).
+
+Data la richiesta computazionale elevata in fase di inferenza, il tutto verrà gestito tramite delle code di processi, con il tool [BullMQ](https://docs.bullmq.io/)
 
 ## Progettazione
 
@@ -28,34 +14,26 @@ Si chiede di sviluppare il codice possibilmente utilizzando typescript.
 ![UML con le rotte da definire](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Use_Case.png)
 ### Diagrammi delle sequenze e funzionamento
 Foriremo in questa sezione una breve descrizione di ogni rotta e il diagramma di flusso ad essa associata.
-| Tipo | Rotta | 
-|--- |--- |
-| GET | /budget | 
-| PATCH | /budget |
-| GET | /dataset |
-| POST | /dataset |
-| PATCH | /dataset |
-| DEL | /dataset|
-| POST | /upload |
-| POST | /upload |
-| POST | /upload |
-| GET | /py |
+| Verbo | Rotta |Descrizione|
+| --- | --- | --- |
+| GET | /budget | Leggere il credito di un utente |
+| PATCH | /budget | Ricaricare il credito di un utente (funzionalità *admin*) |
+| GET | /dataset |Lista dei dataset dell'utente che li richiede. (Se *admin* mostra tutti i ds. memorizzati)|
+| POST | /dataset | Creazione di un nuovo dataset |
+| PATCH | /dataset | Aggiornamento del nome di un dataset |
+| DEL | /dataset| Eliminazione di un dataset |
+| POST | /upload | Caricamento di una lista di immagini o file zip con insieme di frame |
+| GET | /process | Richiesta di un nuovo task di segmentazione |
+| GET | /status | Controllo dello stato attuale di un task avviato. In caso di completamento viene restituito il risultato della segmentazione (json) |
 
 Seguendo l'ordine della tabella soprastante:
-* è possibile verificare il credito di un utente
-  ![Diagramma di flusso per verificare il credito di un utente](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/readBudget.png)
-* ricarica il credito di un utente
-  ![Diagramma di flusso per ricaricare il credito di un utente](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/chargeBudget.png)
-* vengono mostrati i dataset dell'utente che li richiede
-  ![Diagramma di flusso per mostrare i dateset di un utente o tutti i dataset in caso di utente admin](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141652.png)
-* viene rinominato un dataset
-  ![Diagramma di flusso per rinominare un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141733.png)
-* viene cancellato un dataset
-  ![Diagramma di flusso per cancellare un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141733.png)
-* viene caricata un'immagine
-  ![Diagramma di flusso per caricare un'immagine in un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/insertImage.png)
-* viene caricato un file zip e poi spacchettato
-  ![Diagramma di flusso per caricare un file zip che verrà poi spacchettato in un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/insertZIP.png)
+* ![Diagramma di flusso per verificare il credito di un utente](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/readBudget.png)
+* ![Diagramma di flusso per ricaricare il credito di un utente](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/chargeBudget.png)
+* ![Diagramma di flusso per mostrare i dateset di un utente o tutti i dataset in caso di utente admin](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141652.png)
+* ![Diagramma di flusso per rinominare un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141733.png)
+* ![Diagramma di flusso per cancellare un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/Screenshot%202023-07-30%20141733.png)
+* ![Diagramma di flusso per caricare un'immagine in un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/insertImage.png)
+* ![Diagramma di flusso per caricare un file zip che verrà poi spacchettato in un dataset](https://github.com/MarcoP1999/programmazione_avanzata/blob/main/docs/insertZIP.png)
 ...
 Per far funzionare queste rotte bisogna genereare un token JWT con gli adeguati parametri e con le credenziali di un utente autenticato(admin e non) e poi passarlo a Postman che risponderà alla richiesta.
 

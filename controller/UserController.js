@@ -62,7 +62,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 var userModel = __importStar(require("../model/Users.js"));
 var datasetModel = __importStar(require("../model/Datasets.js"));
-var uploader = __importStar(require("../middleware/fileUploader.js"));
 var fileModel = __importStar(require("../model/Files.js"));
 var UserController = /** @class */ (function () {
     function UserController() {
@@ -130,40 +129,24 @@ var UserController = /** @class */ (function () {
                 }
             });
         }); };
-        this.upload = function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
-            var uuid, _a, processOK, _b, _c, _d;
-            return __generator(this, function (_e) {
-                switch (_e.label) {
+        this.getDatasetId = function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        uuid = require('crypto');
                         _a = res.locals;
                         return [4 /*yield*/, datasetModel.getdatasetPK(req.user.dataset, req.user.email)];
                     case 1:
-                        _a.datasetPK = _e.sent();
-                        if (!res.locals.datasetPK)
+                        _a.datasetPK = _b.sent();
+                        if (!res.locals.datasetPK) {
+                            console.log("Dataset '" + req.user.dataset + "' not found");
                             res.status(404).send("Dataset '" + req.user.dataset + "' not found");
-                        processOK = true;
-                        req.user.files.forEach(function (currentFile) {
-                            res.locals.FSpath = "./images/" + uuid.randomUUID().toString() + ".jpg";
-                            if (fileModel.saveImgDB(res.locals.datasetPK, res.locals.FSpath) && uploader.saveImgFS(req, res, next, currentFile)) {
-                                console.log("File " + res.locals.FSpath + " saved to DB");
-                            }
-                            else
-                                processOK = false;
-                        });
-                        if (!processOK) return [3 /*break*/, 3];
-                        userModel.updateBudget(req.budgetProposal, req.user.email);
-                        _c = (_b = res.status(200)).send;
-                        _d = "Files [" + req.user.files + "] upload complete!" +
-                            "\nCurrent budget is: ";
-                        return [4 /*yield*/, userModel.getBudget(req.user.email)];
-                    case 2:
-                        _c.apply(_b, [_d + (_e.sent()).dataValues.budget]);
-                        return [3 /*break*/, 4];
-                    case 3:
-                        res.status(400).send("Error uploading images");
-                        _e.label = 4;
-                    case 4: return [2 /*return*/];
+                        }
+                        else {
+                            console.log("This dataset: '" + req.user.dataset + "' has PK: " + res.locals.datasetPK);
+                            next();
+                        }
+                        return [2 /*return*/];
                 }
             });
         }); };
@@ -181,6 +164,7 @@ var UserController = /** @class */ (function () {
                         return [4 /*yield*/, fileModel.readFiles(datasetPK)];
                     case 2:
                         datasetElems = _a.sent();
+                        console.log();
                         if (!datasetElems)
                             res.status(404).send("No files in this dataset");
                         datasetElems.forEach(function (element) {

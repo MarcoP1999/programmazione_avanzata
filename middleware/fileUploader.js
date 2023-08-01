@@ -59,30 +59,34 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.unpackZip = exports.checkFormat = exports.billSegmentation = exports.billUpload = exports.saveImgFS = void 0;
+exports.unpackZip = exports.checkFormat = exports.billSegmentation = exports.billUpload = exports.saveImgDB = exports.saveImgFS = void 0;
 var datasetModel = __importStar(require("../model/Datasets.js"));
 var userModel = __importStar(require("../model/Users.js"));
 var fileModel = __importStar(require("../model/Files.js"));
 var fs = require('fs');
 var path = require('path');
 var AdmZip = require("adm-zip");
-function saveImgFS(req, res, next, currentFile) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            if (fs.copyFile(currentFile, res.locals.FSpath, fs.constants.COPYFILE_EXCL, function (err) {
-                if (err) {
-                    console.log("File '" + res.locals.FSpath + "' copy to FileSystem failed");
-                    return false;
-                }
-                else
-                    return true;
-            }))
-                return [2 /*return*/, true];
-            return [2 /*return*/];
-        });
-    });
+function saveImgFS(currentFile, res) {
+    try {
+        fs.copyFileSync(currentFile, res.locals.FSpath, fs.constants.COPYFILE_EXCL);
+        console.log("Requested file " + currentFile + " copied to FS in:" + res.locals.FSpath);
+    }
+    catch (err) {
+        console.log("File '" + res.locals.FSpath + "' copy to FileSystem failed");
+        res.status(404).send("File '" + res.locals.FSpath + "' copy to FileSystem failed");
+    }
 }
 exports.saveImgFS = saveImgFS;
+function saveImgDB(res) {
+    if (fileModel.writeDB(res.locals.datasetPK, res.locals.FSpath)) {
+        console.log("Image " + res.locals.FSpath + " written to DB");
+    }
+    else {
+        console.log("Can't write image: " + res.locals.FSpath + " to DB");
+        res.status(404).send("Can't write image: " + res.locals.FSpath + " to DB");
+    }
+}
+exports.saveImgDB = saveImgDB;
 function billUpload(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var currentBudget;
@@ -152,8 +156,10 @@ function checkFormat(req, res, next) {
         console.log("checkFormat OK");
         next();
     }
-    else
+    else {
+        console.log("Files unsupported" + req.user.files);
         res.status(400).send("Files unsupported" + req.user.files);
+    }
 }
 exports.checkFormat = checkFormat;
 function unpackZip(req, res, next) {
@@ -173,6 +179,7 @@ function unpackZip(req, res, next) {
                     next();
                     return [3 /*break*/, 3];
                 case 2:
+                    console.log("Image uploaded => no zip to unpack");
                     next();
                     _a.label = 3;
                 case 3: return [2 /*return*/];

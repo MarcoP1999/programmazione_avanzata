@@ -5,7 +5,7 @@ let pyOutput = String();
 
 export async function segmentation(imgList){
 															//just one image
-	let process = spawn('python3', ['./python/SAM_inference.py', imgList[0] ] );
+	let process = spawn('python3', ['./python/SAM_model.py', imgList[0]] );
 
 	process.stdout.on('data', (data) => {
 		pyOutput = data.toString();

@@ -6,16 +6,27 @@ let fs = require('fs');
 let path = require('path')
 let AdmZip = require("adm-zip");
 
-export async function saveImgFS(req, res, next, currentFile){
-	if( fs.copyFile(currentFile, res.locals.FSpath, fs.constants.COPYFILE_EXCL, (err) => {
-			if (err){
-				console.log("File '"+res.locals.FSpath+"' copy to FileSystem failed");
-				return false;
-			}
-			else return true;
-		})
-	) return true;
+export function saveImgFS(currentFile, res){
+	try{
+		fs.copyFileSync(currentFile, res.locals.FSpath, fs.constants.COPYFILE_EXCL);
+		console.log("Requested file "+ currentFile+ " copied to FS in:"+res.locals.FSpath)
+	}
+	catch (err) {
+		console.log("File '"+res.locals.FSpath+"' copy to FileSystem failed");
+		res.status(404).send("File '"+res.locals.FSpath+"' copy to FileSystem failed");
+	}
 } 
+
+
+export function saveImgDB(res){
+	if( fileModel.writeDB(res.locals.datasetPK, res.locals.FSpath) ){
+		console.log("Image "+res.locals.FSpath+ " written to DB");
+	}
+	else{
+		console.log("Can't write image: "+res.locals.FSpath+" to DB");
+		res.status(404).send("Can't write image: "+res.locals.FSpath+" to DB");
+	}
+}
 
 
 export async function billUpload(req, res, next){
@@ -66,7 +77,10 @@ export function checkFormat(req, res, next) {
 		console.log("checkFormat OK");
 		next();
 	}
-	else res.status(400).send("Files unsupported"+req.user.files);
+	else{
+		console.log("Files unsupported"+req.user.files)
+		res.status(400).send("Files unsupported"+req.user.files);
+	}
 }
 
 
@@ -81,8 +95,10 @@ export async function unpackZip(req, res, next){
 		updateFilesList(req, zipEntries);
 		next();
 	}
-	else //was an image => skipping
+	else{ //was an image => skipping
+		console.log("Image uploaded => no zip to unpack");
 		next();
+	}
 }
 
 

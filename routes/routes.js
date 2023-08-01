@@ -121,12 +121,27 @@ router.patch("/dataset", auth.checkUser, function (req, res) { return __awaiter(
     });
 }); });
 var uploader = __importStar(require("../middleware/fileUploader.js"));
-router.post("/upload", auth.checkUser, uploader.checkFormat, uploader.unpackZip, uploader.billUpload, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, userCnt.upload(req, res, next)];
+var userModel = __importStar(require("../model/Users.js"));
+var uuid = require('crypto');
+router.post("/upload", auth.checkUser, uploader.checkFormat, uploader.unpackZip, uploader.billUpload, userCnt.getDatasetId, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, _b, _c;
+    return __generator(this, function (_d) {
+        switch (_d.label) {
+            case 0:
+                req.user.files.forEach(function (currentFile) {
+                    res.locals.FSpath = "./images/" + uuid.randomUUID().toString() + ".jpg";
+                    uploader.saveImgFS(currentFile, res);
+                    uploader.saveImgDB(res);
+                });
+                return [4 /*yield*/, userModel.updateBudget(req.budgetProposal, req.user.email)];
             case 1:
-                _a.sent();
+                _d.sent();
+                _b = (_a = res.status(200)).send;
+                _c = "Files [" + req.user.files + "] upload complete!" +
+                    "\nCurrent budget is: ";
+                return [4 /*yield*/, userModel.getBudget(req.user.email)];
+            case 2:
+                _b.apply(_a, [_c + (_d.sent()).dataValues.budget]);
                 return [2 /*return*/];
         }
     });
@@ -135,9 +150,8 @@ router.post("/upload", auth.checkUser, uploader.checkFormat, uploader.unpackZip,
 var pythonAdapter = __importStar(require("../middleware/pythonAdapter.js"));
 var bullmq_1 = require("bullmq");
 var ioredis_1 = __importDefault(require("ioredis"));
-var connection = new ioredis_1.default();
+var connection = new ioredis_1.default(parseInt(process.env.REDIS_PORT), process.env.REDIS_HOST, { maxRetriesPerRequest: null });
 var queue = new bullmq_1.Queue('AsyncProc', { connection: connection });
-var queueEvents = new bullmq_1.QueueEvents(queue.name);
 var worker = new bullmq_1.Worker(queue.name, function (job) { return __awaiter(void 0, void 0, void 0, function () {
     var err;
     return __generator(this, function (_a) {
@@ -155,9 +169,9 @@ var worker = new bullmq_1.Worker(queue.name, function (job) { return __awaiter(v
         }
     });
 }); }, {
-    connection: connection,
     removeOnComplete: { count: 1000 },
     removeOnFail: { count: 5000 },
+    connection: connection
 });
 //-------------------- Python ------------------------------------------
 router.get("/process", auth.checkUser, userCnt.getDBfiles, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
@@ -181,13 +195,15 @@ router.get("/status", auth.checkUser, function (req, res, next) { return __await
             case 0: return [4 /*yield*/, queue.getJob(req.user.pid)];
             case 1:
                 requestedJob = _a.sent();
+                if (!requestedJob)
+                    res.status(404).send("Job: " + requestedJob.id + " doesn't exist!");
                 return [4 /*yield*/, requestedJob.getState()];
             case 2:
                 state = _a.sent();
                 if (state == "completed")
                     res.status(200).json(JSON.parse(requestedJob.returnvalue));
                 else
-                    res.status(200).send("Job: " + requestedJob.id + " is " + state);
+                    res.status(200).send("Job: " + requestedJob.id + " is " + state.toUpperCase());
                 return [2 /*return*/];
         }
     });

@@ -1,7 +1,7 @@
 import * as userModel from "../model/Users.js";
 import * as datasetModel from "../model/Datasets.js";
-import * as uploader from "../middleware/fileUploader.js";
 import * as fileModel from "../model/Files.js";
+
 
 export class UserController{
 
@@ -47,30 +47,17 @@ export class UserController{
 		}
 	}
 
-	public upload = async (req, res, next) => {
-		const uuid = require('crypto');
 
+	public getDatasetId = async (req, res, next) => {
 		res.locals.datasetPK = await datasetModel.getdatasetPK(req.user.dataset, req.user.email);
-		if(! res.locals.datasetPK)
+		if(! res.locals.datasetPK){
+			console.log("Dataset '"+req.user.dataset+"' not found")
 			res.status(404).send("Dataset '"+req.user.dataset+"' not found");
-
-		let processOK = true;
-		req.user.files.forEach( function(currentFile){
-			res.locals.FSpath = "./images/" + uuid.randomUUID().toString() + ".jpg";
-
-			if(fileModel.saveImgDB(res.locals.datasetPK, res.locals.FSpath) && uploader.saveImgFS(req, res, next, currentFile) ){
-				console.log("File " + res.locals.FSpath + " saved to DB");
-			}
-			else processOK = false;
-		});
-
-		if(processOK){
-			userModel.updateBudget(req.budgetProposal, req.user.email);
-			res.status(200).send("Files ["+ req.user.files +"] upload complete!"+
-				"\nCurrent budget is: "+ (await userModel.getBudget(req.user.email)).dataValues.budget );
 		}
-		else 
-			res.status(400).send("Error uploading images");
+		else{
+			console.log("This dataset: '"+req.user.dataset+"' has PK: "+res.locals.datasetPK)
+			next();
+		}
 	}
 
 
@@ -80,6 +67,7 @@ export class UserController{
 		if(! datasetPK)
 			res.status(404).send("Dataset not found");
 		let datasetElems = await fileModel.readFiles(datasetPK);
+		console.log()
 		if(! datasetElems)
 			res.status(404).send("No files in this dataset");
 		datasetElems.forEach(element => {
@@ -87,4 +75,6 @@ export class UserController{
 		});
 		next();
 	}
+
+	
 }

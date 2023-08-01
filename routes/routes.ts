@@ -84,88 +84,54 @@ router.post("/upload",
 //-------------------- Queues ------------------------------------------
 import * as pythonAdapter from "../middleware/pythonAdapter.js"
 
-const Queue = require('bull');
-const queue = new Queue('python', {
-	redis: {
-	  host: '127.0.0.1',
-	  port: 6379
-	},
-	settings:{
-		lockDuration: 360000
-	}
-});
+import { Job, QueueEvents, Queue, Worker } from 'bullmq';
+import IORedis from 'ioredis';
 
+const connection = new IORedis();
 
-queue.process(async (job) => {
+const queue = new Queue('AsyncProc', { connection } );
+const queueEvents = new QueueEvents(queue.name);
+
+const worker = new Worker(queue.name, async (job: Job) => {
 	if( uploader.billSegmentation ){
-		console.log("Started a process consumer")
-		return pythonAdapter.segmentation(job.data.images);
+		console.log("Started an async job")
+		return await pythonAdapter.segmentation(job.data.images);
 	}
-	else
-		job.moveToFailed();
-});
-
-
-const jobStates = Object.create(null)
-
-queue.on('global:completed', function(jobId){
-	console.log("Inference completed (Queue)");
-	jobStates[jobId] = "completed"; //then remove from Dict
-	console.log("ID:"+jobId);
-})
-
-queue.on('error', function(error) {
-})
-  
-queue.on('waiting', function(job){
-	// A Job is waiting to be processed as soon as a worker is idling.
-	//res.jobStates(200).send("jobStates: ", job.id, " is waiting to be executed");
-	jobStates[job.name] = "waiting";
-});
-
-queue.on('active', function(job, jobPromise){
-	//res.jobStates(200).send("Job: "+job.id+ "=> Model is running: "+progress*100+"%");
-	jobStates[job.name] = "active";
-})
-
-queue.on('failed', function(job){
-	//res.jobStates(401).send("Job: "+job.id+"failed.\nRequired " +(4*res.locals.fileCount )+ 
-		//" credits to start segmentation.\n "+req.user.email+" has just "+ userCnt.getBudget(req, res) );
-	jobStates[job.name] = "failed";
-})
-
-
-
-//-------------------- Python ------------------------------------------
-router.get("/py",
-	auth.checkUser,
-	userCnt.getDBfiles,
-	//uploader.billSegmentation,
-	async (req, res) => {
-		//pythonAdapter.segmentation(res, req.user.files);
+	else{
+		let err = new Error("Not enough credit")
+		job.moveToFailed(err,null,true);
+	}
+	},{
+		connection,
+		removeOnComplete: { count: 1000 },
+		removeOnFail: { count: 5000 },
 	}
 );
 
-
+//-------------------- Python ------------------------------------------
 
 router.get("/process",
 	auth.checkUser,
 	userCnt.getDBfiles,
-	async (req, res) => {
-		let pid = "pid_" + Math.random().toString(36).slice(10);
-		await queue.add( {images: req.user.files} ).then();
+	async (req, res, next) => {
+		let pid:string = "pid_" + Math.random().toString(36).slice(10);
+		await queue.add(queue.name, {images: req.user.files}, { jobId: pid});
 		res.status(200).send("Job: "+pid+" added to processing queue")
 	}
 );
 
-import * as qManager from "../middleware/queueManager.js"
 router.get("/status",
 	auth.checkUser,
 	async (req, res, next) => {
-		qManager.sendResponse(req, res, jobStates[req.pid] );
+		let requestedJob = await queue.getJob(req.user.pid);
+		let state = await requestedJob.getState();
+
+		if( state == "completed")
+			res.status(200).json( JSON.parse(requestedJob.returnvalue) );
+		else
+			res.status(200).send("Job: "+requestedJob.id+" is "+ state);
 	}
 );
-
 
 
 

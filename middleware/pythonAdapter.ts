@@ -1,22 +1,20 @@
-const { spawnSync } = require('child_process').spawnSync;
+import { spawn } from 'child_process';
+const { once } = require('events');
+
 let pyOutput = String();
 
-
 export async function segmentation(imgList){
-																	//just one image
-	let process = spawnSync('python3', ['./python/SAM_inference.py', imgList[0] ], { encoding : 'utf8' });
-	console.log(process);
-	return process.stdout;
+															//just one image
+	let process = spawn('python3', ['./python/SAM_inference.py', imgList[0] ] );
 
-	/*
 	process.stdout.on('data', (data) => {
-		pyOutput = data
+		pyOutput = data.toString();
 	});
-	   
-	process.on('close', () => {
-		console.log("Inference completed");
-		return pyOutput;
-		//res.status(200).json( JSON.parse( pyOutput ) );
-	});
-	*/
+
+	process.stdout.on('end', async ()=> {
+		console.log("Segmentation completed => send a new 'InferenceStatus' request");
+    });
+
+    await once(process, 'close');
+	return pyOutput;
 }

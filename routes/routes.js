@@ -133,64 +133,40 @@ router.post("/upload", auth.checkUser, uploader.checkFormat, uploader.unpackZip,
 }); });
 //-------------------- Queues ------------------------------------------
 var pythonAdapter = __importStar(require("../middleware/pythonAdapter.js"));
-var Queue = require('bull');
-var queue = new Queue('python', {
-    redis: {
-        host: '127.0.0.1',
-        port: 6379
-    },
-    settings: {
-        lockDuration: 360000
-    }
-});
-queue.process(function (job) { return __awaiter(void 0, void 0, void 0, function () {
+var bullmq_1 = require("bullmq");
+var ioredis_1 = __importDefault(require("ioredis"));
+var connection = new ioredis_1.default();
+var queue = new bullmq_1.Queue('AsyncProc', { connection: connection });
+var queueEvents = new bullmq_1.QueueEvents(queue.name);
+var worker = new bullmq_1.Worker(queue.name, function (job) { return __awaiter(void 0, void 0, void 0, function () {
+    var err;
     return __generator(this, function (_a) {
-        if (uploader.billSegmentation) {
-            console.log("Started a process consumer");
-            return [2 /*return*/, pythonAdapter.segmentation(job.data.images)];
+        switch (_a.label) {
+            case 0:
+                if (!uploader.billSegmentation) return [3 /*break*/, 2];
+                console.log("Started an async job");
+                return [4 /*yield*/, pythonAdapter.segmentation(job.data.images)];
+            case 1: return [2 /*return*/, _a.sent()];
+            case 2:
+                err = new Error("Not enough credit");
+                job.moveToFailed(err, null, true);
+                _a.label = 3;
+            case 3: return [2 /*return*/];
         }
-        else
-            job.moveToFailed();
-        return [2 /*return*/];
     });
-}); });
-var jobStates = Object.create(null);
-queue.on('global:completed', function (jobId) {
-    console.log("Inference completed (Queue)");
-    jobStates[jobId] = "completed"; //then remove from Dict
-    console.log("ID:" + jobId);
-});
-queue.on('error', function (error) {
-});
-queue.on('waiting', function (job) {
-    // A Job is waiting to be processed as soon as a worker is idling.
-    //res.jobStates(200).send("jobStates: ", job.id, " is waiting to be executed");
-    jobStates[job.name] = "waiting";
-});
-queue.on('active', function (job, jobPromise) {
-    //res.jobStates(200).send("Job: "+job.id+ "=> Model is running: "+progress*100+"%");
-    jobStates[job.name] = "active";
-});
-queue.on('failed', function (job) {
-    //res.jobStates(401).send("Job: "+job.id+"failed.\nRequired " +(4*res.locals.fileCount )+ 
-    //" credits to start segmentation.\n "+req.user.email+" has just "+ userCnt.getBudget(req, res) );
-    jobStates[job.name] = "failed";
+}); }, {
+    connection: connection,
+    removeOnComplete: { count: 1000 },
+    removeOnFail: { count: 5000 },
 });
 //-------------------- Python ------------------------------------------
-router.get("/py", auth.checkUser, userCnt.getDBfiles, 
-//uploader.billSegmentation,
-function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        return [2 /*return*/];
-    });
-}); });
-router.get("/process", auth.checkUser, userCnt.getDBfiles, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+router.get("/process", auth.checkUser, userCnt.getDBfiles, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var pid;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 pid = "pid_" + Math.random().toString(36).slice(10);
-                return [4 /*yield*/, queue.add({ images: req.user.files }).then()];
+                return [4 /*yield*/, queue.add(queue.name, { images: req.user.files }, { jobId: pid })];
             case 1:
                 _a.sent();
                 res.status(200).send("Job: " + pid + " added to processing queue");
@@ -198,11 +174,22 @@ router.get("/process", auth.checkUser, userCnt.getDBfiles, function (req, res) {
         }
     });
 }); });
-var qManager = __importStar(require("../middleware/queueManager.js"));
 router.get("/status", auth.checkUser, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var requestedJob, state;
     return __generator(this, function (_a) {
-        qManager.sendResponse(req, res, jobStates[req.pid]);
-        return [2 /*return*/];
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, queue.getJob(req.user.pid)];
+            case 1:
+                requestedJob = _a.sent();
+                return [4 /*yield*/, requestedJob.getState()];
+            case 2:
+                state = _a.sent();
+                if (state == "completed")
+                    res.status(200).json(JSON.parse(requestedJob.returnvalue));
+                else
+                    res.status(200).send("Job: " + requestedJob.id + " is " + state);
+                return [2 /*return*/];
+        }
     });
 }); });
 //-------------------- Error Fallback --------------------------------------

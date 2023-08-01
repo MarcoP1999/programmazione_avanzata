@@ -37,15 +37,31 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.segmentation = void 0;
-var spawnSync = require('child_process').spawnSync.spawnSync;
+var child_process_1 = require("child_process");
+var once = require('events').once;
 var pyOutput = String();
 function segmentation(imgList) {
     return __awaiter(this, void 0, void 0, function () {
         var process;
+        var _this = this;
         return __generator(this, function (_a) {
-            process = spawnSync('python3', ['./python/SAM_inference.py', imgList[0]], { encoding: 'utf8' });
-            console.log(process);
-            return [2 /*return*/, process.stdout];
+            switch (_a.label) {
+                case 0:
+                    process = (0, child_process_1.spawn)('python3', ['./python/SAM_inference.py', imgList[0]]);
+                    process.stdout.on('data', function (data) {
+                        pyOutput = data.toString();
+                    });
+                    process.stdout.on('end', function () { return __awaiter(_this, void 0, void 0, function () {
+                        return __generator(this, function (_a) {
+                            console.log("Segmentation completed => send a new 'InferenceStatus' request");
+                            return [2 /*return*/];
+                        });
+                    }); });
+                    return [4 /*yield*/, once(process, 'close')];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/, pyOutput];
+            }
         });
     });
 }

@@ -56,4 +56,4 @@ for current in sys.argv[1].split(","):
 		"objects": measureAreas(imageMask)
 	}
 	objList.append( json.dumps(maskObj) )
-print( (str(objList)).replace("'", "") )
+print( (str(objList)).replace("'", ""))

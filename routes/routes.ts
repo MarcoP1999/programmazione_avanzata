@@ -84,13 +84,9 @@ router.post("/upload",
 //-------------------- Queues ------------------------------------------
 import * as pythonAdapter from "../middleware/pythonAdapter.js"
 
-import { Job, QueueEvents, Queue, Worker } from 'bullmq';
-import IORedis from 'ioredis';
+import { Job, Queue, Worker } from 'bullmq';
 
-const connection = new IORedis();
-
-const queue = new Queue('AsyncProc', { connection } );
-const queueEvents = new QueueEvents(queue.name);
+const queue = new Queue('AsyncProc');
 
 const worker = new Worker(queue.name, async (job: Job) => {
 	if( uploader.billSegmentation ){
@@ -102,7 +98,6 @@ const worker = new Worker(queue.name, async (job: Job) => {
 		job.moveToFailed(err,null,true);
 	}
 	},{
-		connection,
 		removeOnComplete: { count: 1000 },
 		removeOnFail: { count: 5000 },
 	}
@@ -129,7 +124,7 @@ router.get("/status",
 		if( state == "completed")
 			res.status(200).json( JSON.parse(requestedJob.returnvalue) );
 		else
-			res.status(200).send("Job: "+requestedJob.id+" is "+ state);
+			res.status(200).send("Job: "+requestedJob.id+" is "+ state.toUpperCase());
 	}
 );
 

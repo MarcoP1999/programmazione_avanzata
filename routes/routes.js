@@ -134,10 +134,7 @@ router.post("/upload", auth.checkUser, uploader.checkFormat, uploader.unpackZip,
 //-------------------- Queues ------------------------------------------
 var pythonAdapter = __importStar(require("../middleware/pythonAdapter.js"));
 var bullmq_1 = require("bullmq");
-var ioredis_1 = __importDefault(require("ioredis"));
-var connection = new ioredis_1.default();
-var queue = new bullmq_1.Queue('AsyncProc', { connection: connection });
-var queueEvents = new bullmq_1.QueueEvents(queue.name);
+var queue = new bullmq_1.Queue('AsyncProc');
 var worker = new bullmq_1.Worker(queue.name, function (job) { return __awaiter(void 0, void 0, void 0, function () {
     var err;
     return __generator(this, function (_a) {
@@ -155,7 +152,6 @@ var worker = new bullmq_1.Worker(queue.name, function (job) { return __awaiter(v
         }
     });
 }); }, {
-    connection: connection,
     removeOnComplete: { count: 1000 },
     removeOnFail: { count: 5000 },
 });
@@ -187,7 +183,7 @@ router.get("/status", auth.checkUser, function (req, res, next) { return __await
                 if (state == "completed")
                     res.status(200).json(JSON.parse(requestedJob.returnvalue));
                 else
-                    res.status(200).send("Job: " + requestedJob.id + " is " + state);
+                    res.status(200).send("Job: " + requestedJob.id + " is " + state.toUpperCase());
                 return [2 /*return*/];
         }
     });

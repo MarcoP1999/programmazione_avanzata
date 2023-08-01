@@ -2,8 +2,3 @@
 opencv-python #includes 'numpy'
 torch
 segment-anything
-#used?
-requests
-Python-IO
-torchvision
-Pillow

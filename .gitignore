@@ -3,4 +3,4 @@ images
 unzipped
 .env
 .DS_Store
-python/CHECKPOINT_sam_vit_b.pth
+python/sam_vit_b_01ec64.pth

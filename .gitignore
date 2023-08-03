@@ -3,4 +3,5 @@ images
 unzipped
 .env
 .DS_Store
+.js
 python/sam_vit_b_01ec64.pth

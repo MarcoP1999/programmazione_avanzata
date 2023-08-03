@@ -1,17 +1,7 @@
 import sys #reading .py input params
-#import os
 import cv2
-#import glob
 import torch
 import json
-#import random
-#import requests
-#import numpy as np
-#import torchvision
-#import torch.nn as nn
-#from io import BytesIO
-
-#from PIL import Image
 from segment_anything import SamPredictor
 from segment_anything import sam_model_registry
 from segment_anything import SamAutomaticMaskGenerator

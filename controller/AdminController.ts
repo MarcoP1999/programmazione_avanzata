@@ -1,5 +1,6 @@
 import * as userModel from "../model/Users.js";
 import * as datasetModel from "../model/Datasets.js";
+import * as fileModel from "../model/Files.js";
 
 export class AdminController{
 
@@ -25,7 +26,6 @@ export class AdminController{
 			res.status(200).send(req.user.email+" your datasets are: "+ String(list) );
 
 	}
-
 
 	/* La verifica dei permessi di accesso è realizzato nel controller
 	* evitando di appesantire le funzionalità del Model, che rimane generico */

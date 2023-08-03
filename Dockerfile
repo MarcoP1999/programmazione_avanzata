@@ -3,6 +3,7 @@ FROM node:slim
 RUN apt update
 RUN apt-get install -y python3-pip git
 
+RUN mkdir /usr/src/images
 WORKDIR /usr/src/app
 COPY . .
 

@@ -69,13 +69,24 @@ router.patch("/dataset",
 );
 
 import * as uploader from "../middleware/fileUploader.js";
+import * as userModel from "../model/Users.js";
+const uuid = require('crypto');
+
 router.post("/upload",
 	auth.checkUser,
 	uploader.checkFormat,
 	uploader.unpackZip,
 	uploader.billUpload,
-	async (req, res, next) => {
-		await userCnt.upload(req, res, next);
+	userCnt.getDatasetId,
+	async (req, res, next) => { 
+		req.user.files.forEach( function(currentFile){
+			res.locals.FSpath = "./images/" + uuid.randomUUID().toString() + ".jpg";
+			uploader.saveImgFS(currentFile, res);
+			uploader.saveImgDB(res);
+		});
+		await userModel.updateBudget(req.budgetProposal, req.user.email);
+		res.status(200).send("Files ["+ req.user.files +"] upload complete!"+
+				"\nCurrent budget is: "+ (await userModel.getBudget(req.user.email)).dataValues.budget );
 	}
 );
 
@@ -85,8 +96,11 @@ router.post("/upload",
 import * as pythonAdapter from "../middleware/pythonAdapter.js"
 
 import { Job, Queue, Worker } from 'bullmq';
+import IORedis from 'ioredis';
 
-const queue = new Queue('AsyncProc');
+const connection = new IORedis(parseInt(process.env.REDIS_PORT), process.env.REDIS_HOST, { maxRetriesPerRequest: null} );
+
+const queue = new Queue('AsyncProc', {connection:connection} );
 
 const worker = new Worker(queue.name, async (job: Job) => {
 	if( uploader.billSegmentation ){
@@ -100,8 +114,8 @@ const worker = new Worker(queue.name, async (job: Job) => {
 	},{
 		removeOnComplete: { count: 1000 },
 		removeOnFail: { count: 5000 },
-	}
-);
+		connection: connection
+	});
 
 //-------------------- Python ------------------------------------------
 
@@ -119,6 +133,8 @@ router.get("/status",
 	auth.checkUser,
 	async (req, res, next) => {
 		let requestedJob = await queue.getJob(req.user.pid);
+		if(! requestedJob)
+			res.status(404).send("Job: "+requestedJob.id+" doesn't exist!");
 		let state = await requestedJob.getState();
 
 		if( state == "completed")

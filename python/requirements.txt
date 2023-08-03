@@ -1,4 +1,4 @@
 ### PYTHON package requirements
-opencv-python #includes 'numpy'
-torch
+torch  #includes 'numpy', 'opencv-python'
+torchvision
 segment-anything

@@ -6,13 +6,13 @@ RUN apt-get install -y python3-pip git
 RUN mkdir /usr/src/images
 WORKDIR /usr/src/app
 COPY . .
+ADD https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth /usr/src/app/python
 
 RUN pip install -r ./python/requirements.txt --break-system-packages
 RUN pip install git+https://github.com/facebookresearch/segment-anything.git --break-system-packages
-WORKDIR /usr/src/app/python
-RUN wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth
-
-WORKDIR /usr/src/app
+#WORKDIR /usr/src/app/python
+#RUN curl -LJO  https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth
+#WORKDIR /usr/src/app
 RUN npm install
 RUN npm install express
 RUN npm install pg pg-hstore
